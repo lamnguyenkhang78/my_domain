@@ -73,7 +73,7 @@
         function displayMessage(msg) {
             const div = document.createElement('div');
             div.className = 'message-item';
-            div.innerHTML = `<strong>${escapeHtml(msg.username)}:</strong> ${escapeHtml(msg.text)}`;
+            div.innerHTML = `<strong>${escapeHtml(msg.username || "Ẩn danh")}:</strong> ${escapeHtml(msg.text || "")}`;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
@@ -89,7 +89,7 @@
                 .insert([{ username: user, text: text }]);
 
             if (error) {
-                alert('Gửi tin nhắn thất bại!');
+                alert('Gửi tin nhắn thất bại! Chi tiết: ' + error.message);
                 console.error(error);
             } else {
                 document.getElementById('message').value = '';
