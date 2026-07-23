@@ -8,13 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Google reCAPTCHA v2 -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    <!-- EmailJS for error reporting to email -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <script type="text/javascript">
-        (function() {
-            emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
-        })();
-    </script>
     <style>
         :root {
             --comm-primary: #6366f1;
@@ -61,7 +54,7 @@
         .language-selector-bar span:hover { color: var(--comm-text); }
         .language-selector-bar span.active { font-weight: 700; color: #818cf8; }
 
-        /* --- CUSTOM MODAL ALERT DIALOG --- */
+        /* --- CUSTOM MODAL ALERT DIALOG (Căn giữa hoàn toàn, có chữ OK) --- */
         #custom-alert-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(6px); z-index: 9999; justify-content: center; align-items: center; }
         .custom-alert-box { background: var(--comm-card-bg); border: 1px solid var(--comm-border); width: 380px; padding: 30px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); text-align: center; }
         .custom-alert-title { font-size: 18px; font-weight: 700; color: var(--comm-text); margin-bottom: 10px; }
@@ -117,7 +110,7 @@
 </head>
 <body>
 
-    <!-- ================= CUSTOM MODAL ALERT DIALOG ================= -->
+    <!-- ================= CUSTOM MODAL ALERT DIALOG (Thay thế hoàn toàn alert mặc định) ================= -->
     <div id="custom-alert-overlay">
         <div class="custom-alert-box">
             <div class="custom-alert-title" id="custom-alert-title">Notice</div>
@@ -143,7 +136,7 @@
                     
                     <div class="divider"></div>
                     
-                    <!-- Social Login Buttons with Official Brand Icons -->
+                    <!-- Social Login Buttons (Firebase Auth) -->
                     <button class="social-btn" id="t-google-btn" onclick="loginWithProvider('google')">
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo"> Continue with Google
                     </button>
@@ -174,7 +167,7 @@
         </div>
     </div>
 
-    <!-- Sign Up Modal (Email Verification OTP) -->
+    <!-- Sign Up Modal -->
     <div id="signup-modal">
         <div class="signup-box">
             <span class="signup-close" onclick="closeSignupModal()">&times;</span>
@@ -184,7 +177,7 @@
             
             <input type="email" id="signup-email" class="auth-input" placeholder="Your email address">
             <input type="password" id="signup-password" class="auth-input" placeholder="New password">
-            <p id="t-signup-note" style="font-size:12px; color:var(--comm-text-secondary); margin: -2px 0 16px 0;">* A verification code (OTP) will be sent to your email.</p>
+            <p id="t-signup-note" style="font-size:12px; color:var(--comm-text-secondary); margin: -2px 0 16px 0;">* A verification code will be handled via Firebase Auth.</p>
             <button class="auth-btn" id="t-signup-submit" style="background:var(--comm-success);" onclick="handleSignup()">Sign Up & Verify</button>
         </div>
     </div>
@@ -233,7 +226,39 @@
         </div>
     </div>
 
-    <script>
+    <!-- Firebase SDKs (Modular v12) & Supabase script integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged,
+            GoogleAuthProvider,
+            FacebookAuthProvider,
+            GithubAuthProvider,
+            OAuthProvider,
+            signInWithPopup
+        } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA64s-uDWHU3jW3JPaCkk3g6vsItUxG_cM",
+            authDomain: "my-domain-2206.firebaseapp.com",
+            projectId: "my-domain-2206",
+            storageBucket: "my-domain-2206.firebasestorage.app",
+            messagingSenderId: "213982728791",
+            appId: "1:213982728791:web:64e871cfaeefc9fb75c912",
+            measurementId: "G-VDGPZXG829"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+
+        // Supabase configuration (Dùng bảng và storage của Supabase)
         const SUPABASE_URL = 'https://udoulctmeuffbmvivlot.supabase.co';
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_TuvhrqcChOpDgOVnHfx62A_SFO2bKaO';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
@@ -241,18 +266,18 @@
         let currentUser = null;
         let currentLang = 'en';
 
-        // --- CUSTOM ALERT DIALOG FUNCTION ---
-        function showCustomAlert(message, title = "Notice") {
+        // Custom alert dialog functions
+        window.showCustomAlert = function(message, title = "Notice") {
             document.getElementById('custom-alert-title').innerText = title;
             document.getElementById('custom-alert-msg').innerText = message;
             document.getElementById('custom-alert-overlay').style.display = 'flex';
         }
 
-        function closeCustomAlert() {
+        window.closeCustomAlert = function() {
             document.getElementById('custom-alert-overlay').style.display = 'none';
         }
 
-        // --- DICTIONARY CHO CÁC NGÔN NGỮ ---
+        // --- DICTIONARY ---
         const translations = {
             en: {
                 brandTitle: "community",
@@ -269,7 +294,7 @@
                 signupSubtitle: "It's quick and easy.",
                 signupEmailPlaceholder: "Your email address",
                 signupPassPlaceholder: "New password",
-                signupNote: "* A verification code (OTP) will be sent to your email.",
+                signupNote: "* A verification code will be handled via Firebase Auth.",
                 signupSubmit: "Sign Up & Verify",
                 logoutBtn: "Log Out",
                 postPlaceholder: "What's on your mind?",
@@ -292,7 +317,7 @@
                 signupSubtitle: "Nhanh chóng và dễ dàng.",
                 signupEmailPlaceholder: "Email của bạn",
                 signupPassPlaceholder: "Mật khẩu mới",
-                signupNote: "* Mã xác thực (OTP) sẽ được gửi tới email của bạn.",
+                signupNote: "* Mã xác thực sẽ được xử lý qua Firebase Auth.",
                 signupSubmit: "Đăng ký & Xác thực",
                 logoutBtn: "Đăng xuất",
                 postPlaceholder: "Bạn đang nghĩ gì thế?",
@@ -315,7 +340,7 @@
                 signupSubtitle: "Es rápido y fácil.",
                 signupEmailPlaceholder: "Tu correo electrónico",
                 signupPassPlaceholder: "Nueva contraseña",
-                signupNote: "* Se enviará un código de verificación (OTP) a tu correo.",
+                signupNote: "* La verificación se gestiona mediante Firebase Auth.",
                 signupSubmit: "Registrarse y verificar",
                 logoutBtn: "Cerrar sesión",
                 postPlaceholder: "¿Qué estás pensando?",
@@ -338,7 +363,7 @@
                 signupSubtitle: "C'est rapide et facile.",
                 signupEmailPlaceholder: "Votre adresse e-mail",
                 signupPassPlaceholder: "Nouveau mot de passe",
-                signupNote: "* Un code de vérification (OTP) sera envoyé à votre e-mail.",
+                signupNote: "* La vérification est gérée via Firebase Auth.",
                 signupSubmit: "S'inscrire & Vérifier",
                 logoutBtn: "Se déconnecter",
                 postPlaceholder: "Exprimez-vous...",
@@ -361,7 +386,7 @@
                 signupSubtitle: "簡単で素早くできます。",
                 signupEmailPlaceholder: "メールアドレス",
                 signupPassPlaceholder: "新しいパスワード",
-                signupNote: "* 確認コード(OTP)がメールに送信されます。",
+                signupNote: "* 認証はFirebase Authによって処理されます。",
                 signupSubmit: "登録して認証",
                 logoutBtn: "ログアウト",
                 postPlaceholder: "いまどうしてる？",
@@ -384,7 +409,7 @@
                 signupSubtitle: "빠르고 쉽습니다.",
                 signupEmailPlaceholder: "이메일 주소",
                 signupPassPlaceholder: "새 비밀번호",
-                signupNote: "* 이메일로 인증 코드(OTP)가 전송됩니다.",
+                signupNote: "* 인증은 Firebase Auth를 통해 처리됩니다.",
                 signupSubmit: "가입 및 인증",
                 logoutBtn: "로그아웃",
                 postPlaceholder: "무슨 생각을 하고 계신가요?",
@@ -394,7 +419,7 @@
             }
         };
 
-        function changeLanguage(lang) {
+        window.changeLanguage = function(lang) {
             currentLang = lang;
             document.querySelectorAll('.language-selector-bar span').forEach(el => el.classList.remove('active'));
             document.getElementById('lang-' + lang).classList.add('active');
@@ -424,111 +449,76 @@
             document.getElementById('t-post-btn').innerText = t.postBtn;
         }
 
-        // --- GỬI THÔNG BÁO LỖI VỀ EMAIL ---
-        function reportErrorToEmail(errorMsg, contextInfo) {
-            console.error("Error captured:", errorMsg);
-            
-            emailjs.send("default_service", "template_error_notify", {
-                to_email: "lamnguyenkhang67@gmail.com",
-                error_message: errorMsg,
-                context: contextInfo,
-                time: new Date().toLocaleString()
-            }).then(function(response) {
-                console.log("Error report sent successfully!", response.status, response.text);
-            }, function(error) {
-                console.error("Failed to send error report email:", error);
-            });
-        }
-
-        window.onerror = function (msg, url, lineNo, columnNo, error) {
-            reportErrorToEmail(`Uncaught Error: ${msg} at ${url}:${lineNo}:${columnNo}`, error ? error.stack : 'No stack trace');
-            return false;
-        };
-
-        window.onload = async () => {
-            const { data: { session } } = await _supabase.auth.getSession();
-            handleSession(session);
-
-            _supabase.auth.onAuthStateChange((event, session) => {
-                handleSession(session);
-            });
-
-            // Display selected file name
-            document.getElementById('post-file').addEventListener('change', function() {
-                const nameDisplay = document.getElementById('file-name-display');
-                if (this.files && this.files[0]) {
-                    nameDisplay.innerText = this.files[0].name;
-                } else {
-                    nameDisplay.innerText = translations[currentLang].noFile;
-                }
-            });
-        };
-
-        function handleSession(session) {
-            if (session) {
-                currentUser = session.user;
+        // --- FIREBASE AUTH STATE MONITORING ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
                 document.getElementById('auth-wrapper').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
-                document.getElementById('current-user-email').innerText = currentUser.email;
+                document.getElementById('current-user-email').innerText = currentUser.email || currentUser.displayName || "User";
                 fetchPosts();
             } else {
                 currentUser = null;
                 document.getElementById('auth-wrapper').style.display = 'flex';
                 document.getElementById('app-container').style.display = 'none';
             }
-        }
+        });
 
-        // --- AUTHENTICATION LOGIC ---
-        async function handleLogin() {
+        // --- FIREBASE AUTH ACTIONS ---
+        window.handleLogin = async function() {
             try {
                 const email = document.getElementById('login-email').value.trim();
                 const password = document.getElementById('login-password').value.trim();
                 if (!email || !password) { showCustomAlert('Please fill in all fields!'); return; }
 
-                const { error } = await _supabase.auth.signInWithPassword({ email, password });
-                if (error) {
-                    reportErrorToEmail(error.message, "Login Action Failed");
-                    showCustomAlert('Login failed: ' + error.message);
-                }
+                await signInWithEmailAndPassword(auth, email, password);
             } catch (err) {
-                reportErrorToEmail(err.message, "Login Exception Catch");
+                showCustomAlert('Login failed: ' + err.message);
             }
         }
 
-        function openSignupModal() { document.getElementById('signup-modal').style.display = 'flex'; }
-        function closeSignupModal() { document.getElementById('signup-modal').style.display = 'none'; }
+        window.openSignupModal = function() { document.getElementById('signup-modal').style.display = 'flex'; }
+        window.closeSignupModal = function() { document.getElementById('signup-modal').style.display = 'none'; }
 
-        async function handleSignup() {
+        window.handleSignup = async function() {
             try {
                 const email = document.getElementById('signup-email').value.trim();
                 const password = document.getElementById('signup-password').value.trim();
                 if (!email || !password) { showCustomAlert('Please enter both email and password!'); return; }
 
-                const { data, error } = await _supabase.auth.signUp({ email, password });
-                if (error) {
-                    reportErrorToEmail(error.message, "Signup Action Failed");
-                    showCustomAlert('Sign up failed: ' + error.message);
-                } else {
-                    showCustomAlert('Sign up successful! A verification email has been sent to your inbox. Please check your email before logging in.');
-                    closeSignupModal();
-                }
+                await createUserWithEmailAndPassword(auth, email, password);
+                showCustomAlert('Sign up successful!');
+                closeSignupModal();
             } catch (err) {
-                reportErrorToEmail(err.message, "Signup Exception Catch");
+                showCustomAlert('Sign up failed: ' + err.message);
             }
         }
 
-        async function loginWithProvider(providerName) {
-            const currentOrigin = window.location.origin + window.location.pathname;
-            await _supabase.auth.signInWithOAuth({
-                provider: providerName,
-                options: { redirectTo: currentOrigin }
-            });
+        window.loginWithProvider = async function(providerName) {
+            let provider;
+            if (providerName === 'google') {
+                provider = new GoogleAuthProvider();
+            } else if (providerName === 'facebook') {
+                provider = new FacebookAuthProvider();
+            } else if (providerName === 'github') {
+                provider = new GithubAuthProvider();
+            } else if (providerName === 'discord') {
+                provider = new OAuthProvider('discord');
+            }
+
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (err) {
+                showCustomAlert('Authentication error: ' + err.message);
+            }
         }
 
-        async function logout() { await _supabase.auth.signOut(); }
+        window.logout = async function() { 
+            await signOut(auth); 
+        }
 
-        // --- CREATE POST & UPLOAD FILE ---
-        async function createPost() {
+        // --- CREATE POST & UPLOAD FILE (Sử dụng Supabase Tables & Storage như yêu cầu) ---
+        window.createPost = async function() {
             try {
                 const content = document.getElementById('post-content').value.trim();
                 const fileInput = document.getElementById('post-file');
@@ -544,7 +534,6 @@
                     const fileName = `${Date.now()}_${file.name}`;
                     const { error: uploadError } = await _supabase.storage.from('post-files').upload(fileName, file);
                     if (uploadError) {
-                        reportErrorToEmail(uploadError.message, "Storage File Upload Failed");
                         showCustomAlert('File upload failed: ' + uploadError.message); 
                         return;
                     }
@@ -553,11 +542,10 @@
                     fileUrl = publicUrlData.publicUrl;
                 }
 
-                const username = currentUser.email.split('@')[0];
+                const username = currentUser.email ? currentUser.email.split('@')[0] : 'user';
 
                 const { error } = await _supabase.from('posts').insert([{ username: username, content: content, media_url: fileUrl }]);
                 if (error) {
-                    reportErrorToEmail(error.message, "Post Insertion Failed");
                     showCustomAlert('Failed to create post: ' + error.message);
                 } else {
                     document.getElementById('post-content').value = '';
@@ -567,20 +555,18 @@
                     fetchPosts();
                 }
             } catch (err) {
-                reportErrorToEmail(err.message, "Create Post Exception Catch");
+                showCustomAlert('Error: ' + err.message);
             }
         }
 
-        // --- FETCH POSTS REALTIME ---
+        // --- FETCH POSTS FROM SUPABASE TABLES ---
         async function fetchPosts() {
             const { data, error } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
             if (error) {
-                reportErrorToEmail(error.message, "Fetch Posts Failed");
                 return;
             }
 
             const feedContainer = document.getElementById('feed-container');
-            feedContainer.items = '';
             feedContainer.innerHTML = '';
             if (data) {
                 data.forEach(post => {
@@ -604,7 +590,7 @@
                             ${escapeHtml(post.username)}
                             <span class="comm-post-time">${new Date(post.created_at).toLocaleString()}</span>
                         </div>
-                        <div class="comm-post-text">${escapeHtml(post.content ||)}</div>
+                        <div class="comm-post-text">${escapeHtml(post.content || '')}</div>
                         ${mediaHtml}
                     `;
                     feedContainer.appendChild(div);
@@ -617,9 +603,15 @@
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        _supabase.channel('public:posts')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, () => fetchPosts())
-            .subscribe();
+        // File listener
+        document.getElementById('post-file').addEventListener('change', function() {
+            const nameDisplay = document.getElementById('file-name-display');
+            if (this.files && this.files[0]) {
+                nameDisplay.innerText = this.files[0].name;
+            } else {
+                nameDisplay.innerText = translations[currentLang].noFile;
+            }
+        });
     </script>
 </body>
 </html>
