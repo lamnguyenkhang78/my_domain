@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Portal - Trang Chủ</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google reCAPTCHA v3 API -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6Ld4y2AtAAAAABbpaYVKvm80BkecZyohkh8NMn2mu"></script>
+</head>
+<body class="bg-[#0b0f19] text-white flex items-center justify-center min-h-screen">
+
+    <div class="bg-[#131b2e] border border-gray-800 p-8 rounded-2xl w-full max-w-lg shadow-2xl text-center space-y-6">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight">Authentication Portal</h1>
+            <p class="text-sm text-gray-400 mt-2">Hệ thống xác thực tích hợp Firebase & Supabase</p>
+        </div>
+
+        <div class="p-4 bg-[#1a233a] rounded-xl border border-gray-700/50 text-left space-y-2 text-sm">
+            <p class="text-gray-300"><strong>Email nhận báo lỗi hệ thống:</strong> error-alerts@my-domain-2206.iam.gserviceaccount.com</p>
+            <p class="text-gray-400 text-xs">Bảo mật reCAPTCHA v3: <span class="text-emerald-400 font-semibold">Đang hoạt động ngầm trên toàn trang</span></p>
+        </div>
+
+        <div class="flex gap-4 pt-2">
+            <a href="login/index.html" class="flex-1 bg-indigo-600 hover:bg-indigo-500 transition-colors font-medium py-3 rounded-xl shadow-lg text-center cursor-pointer">
+                Đăng Nhập
+            </a>
+            <a href="signup/index.html" class="flex-1 bg-emerald-600 hover:bg-emerald-500 transition-colors font-medium py-3 rounded-xl shadow-lg text-center cursor-pointer">
+                Đăng Ký
+            </a>
+        </div>
+    </div>
+
+    <!-- Thông báo reCAPTCHA ẩn bảo vệ toàn trang -->
+    <script>
+        grecaptcha.ready(function() {
+            grecaptcha.execute('6Ld4y2AtAAAAABbpaYVKvm80BkecZyohkh8NMn2mu', {action: 'homepage'}).then(function(token) {
+                console.log("reCAPTCHA v3 initialized on Index:", token);
+            });
+        });
+    </script>
+</body>
+</html>
