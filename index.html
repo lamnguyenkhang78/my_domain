@@ -246,7 +246,7 @@
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_TuvhrqcChOpDgOVnHfx62A_SFO2bKaO';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-        // reCAPTCHA v3 Site Key lấy từ cấu hình của bạn
+        // reCAPTCHA v3 Site Key
         const RECAPTCHA_SITE_KEY = '6Ld4y2AtAAAAABbpaYVKvm80BkecZyohkh8MN2mu';
 
         let currentUser = null;
@@ -386,7 +386,14 @@
 
                     let fileUrl = null;
                     if (file) {
-                        const fileName = `${Date.now()}_${file.name}`;
+                        // Làm sạch tên file để tránh lỗi Invalid key do ký tự đặc biệt hoặc emoji
+                        const cleanFileName = file.name
+                            .toLowerCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .replace(/[^a-z0-9.]/g, '_');
+
+                        const fileName = `${Date.now()}_${cleanFileName}`;
                         const { error: uploadError } = await _supabase.storage.from('post-files').upload(fileName, file);
                         if (uploadError) {
                             showCustomAlert('File upload failed: ' + uploadError.message); 
