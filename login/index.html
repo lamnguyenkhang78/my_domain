@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In - Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=6Ld4y2AtAAAAABbpaYVKvm80BkecZyohkh8NMn2mu"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js" type="module"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#0b0f19] text-white flex items-center justify-center min-h-screen py-10">
+
+    <div class="bg-[#131b2e] border border-gray-800 p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-6">
+        <div>
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold tracking-tight">Đăng Nhập</h2>
+                <a href="../index.html" class="text-xs text-indigo-400 hover:underline">← Về trang chủ</a>
+            </div>
+            <p class="text-sm text-gray-400 mt-1">Chào mừng bạn quay lại hệ thống</p>
+        </div>
+
+        <form class="space-y-4" onsubmit="handleLogin(event)">
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Email</label>
+                <input type="email" id="email" placeholder="nhập email của bạn..." class="w-full bg-[#1a233a] border border-gray-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500" required>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Mật khẩu</label>
+                <input type="password" id="password" placeholder="••••••••••••" class="w-full bg-[#1a233a] border border-gray-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500" required>
+            </div>
+
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 transition-colors font-medium py-2.5 rounded-lg shadow-lg cursor-pointer">
+                Log In
+            </button>
+        </form>
+
+        <div class="relative flex py-2 items-center">
+            <div class="flex-grow border-t border-gray-800"></div>
+            <span class="flex-shrink mx-4 text-gray-500 text-xs uppercase">Hoặc</span>
+            <div class="flex-grow border-t border-gray-800"></div>
+        </div>
+
+        <!-- Các nút mạng xã hội -->
+        <div class="space-y-2.5">
+            <button onclick="socialLogin('google')" class="w-full flex items-center justify-center gap-3 bg-[#1a233a] hover:bg-[#232f4d] border border-gray-700/60 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer">
+                <img src="../assets/google.png" class="w-5 h-5 object-contain" alt="Google"> Continue with Google
+            </button>
+            <button onclick="socialLogin('github')" class="w-full flex items-center justify-center gap-3 bg-[#1a233a] hover:bg-[#232f4d] border border-gray-700/60 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer">
+                <img src="../assets/github.png" class="w-5 h-5 object-contain" alt="GitHub"> Continue with GitHub
+            </button>
+            <button onclick="socialLogin('facebook')" class="w-full flex items-center justify-center gap-3 bg-[#1a233a] hover:bg-[#232f4d] border border-gray-700/60 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer">
+                <img src="../assets/facebook.png" class="w-5 h-5 object-contain" alt="Facebook"> Continue with Facebook
+            </button>
+            <button onclick="socialLogin('discord')" class="w-full flex items-center justify-center gap-3 bg-[#1a233a] hover:bg-[#232f4d] border border-gray-700/60 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer">
+                <img src="../assets/discord.png" class="w-5 h-5 object-contain" alt="Discord"> Continue with Discord
+            </button>
+        </div>
+
+        <a href="../signup/index.html" class="block w-full text-center mt-4 bg-emerald-600 hover:bg-emerald-500 transition-colors font-medium py-2.5 rounded-lg text-sm shadow-lg">
+            Create new account
+        </a>
+        
+        <div class="text-[10px] text-gray-500 text-center mt-2">
+            Protected by reCAPTCHA v3 &bull; Báo lỗi gửi về: error-alerts@my-domain-2206.iam.gserviceaccount.com
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyA64s-uDWHU3jW3JPaCkk3g6vsItUxG_cM",
+            authDomain: "my-domain-2206.firebaseapp.com",
+            projectId: "my-domain-2206",
+            storageBucket: "my-domain-2206.firebasestorage.app",
+            messagingSenderId: "213982728791",
+            appId: "1:213982728791:web:64e871cfaeefc9fb75c912",
+            measurementId: "G-VDGPZXG829"
+        };
+
+        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_TuvhrqcChOpDgOVnHfx62A_SFO2bKaO';
+        const SUPABASE_SECRET_KEY = 'sb_secret_FzJnJ2QcMM9FKu_BqbWRpg_z-Xvk46Y';
+        const ERROR_ALERT_EMAIL = 'error-alerts@my-domain-2206.iam.gserviceaccount.com';
+
+        function handleLogin(event) {
+            event.preventDefault();
+            grecaptcha.ready(function() {
+                grecaptcha.execute('6Ld4y2AtAAAAABbpaYVKvm80BkecZyohkh8NMn2mu', {action: 'login'}).then(function(token) {
+                    console.log("reCAPTCHA Token verified:", token);
+                    alert("Đăng nhập thành công!");
+                }).catch(err => {
+                    console.error("Lỗi hệ thống:", err);
+                    // Gửi thông báo lỗi về email hệ thống nếu cần
+                });
+            });
+        }
+
+        function socialLogin(provider) {
+            console.log("Đăng nhập qua mạng xã hội:", provider);
+        }
+    </script>
+</body>
+</html>
