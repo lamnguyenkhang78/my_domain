@@ -71,7 +71,7 @@
                 <button class="social-btn" onclick="loginWithProvider('google')"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Continue with Google</button>
                 <button class="social-btn" onclick="loginWithProvider('github')">Continue with GitHub</button>
                 <div class="divider"></div>
-                <a href="/singup" class="auth-btn" style="background:var(--comm-success); display:block; text-decoration:none; box-sizing:border-box;" id="t-create-acc">Create new account</a>
+                <a href="/signup" class="auth-btn" style="background:var(--comm-success); display:block; text-decoration:none; box-sizing:border-box;" id="t-create-acc">Create new account</a>
             </div>
         </div>
         <div class="language-selector-bar">
@@ -172,7 +172,6 @@
             const password = document.getElementById('login-password').value.trim();
             if(!email || !password) { showCustomAlert("Vui lòng điền đầy đủ thông tin!"); return; }
             
-            // Bật custom captcha bắt buộc xác minh trước khi đăng nhập
             triggerCustomCaptcha(async () => {
                 try {
                     await signInWithEmailAndPassword(auth, email, password);
