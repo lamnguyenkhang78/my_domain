@@ -2,13 +2,15 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Web Chat Realtime - Supabase & Firebase</title>
+    <title>Web Chat Realtime - Supabase & Typing Indicator</title>
     <!-- Thư viện Supabase JS Client v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        #chat-box { height: 300px; border: 1px solid #ddd; background: #fff; overflow-y: scroll; padding: 15px; margin-bottom: 15px; border-radius: 4px; display: flex; flex-direction: column; gap: 8px; }
+        #chat-box { height: 300px; border: 1px solid #ddd; background: #fff; overflow-y: scroll; padding: 15px; margin-bottom: 5px; border-radius: 4px; display: flex; flex-direction: column; gap: 8px; }
         .message-item { padding: 8px 12px; background: #f1f0f0; border-radius: 6px; word-break: break-word; }
+        .device-tag { font-size: 11px; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; color: #555; margin-left: 5px; }
+        #typing-indicator { height: 20px; font-style: italic; color: #666; font-size: 13px; margin-bottom: 10px; }
         .input-group { display: flex; gap: 10px; }
         input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
         button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
@@ -17,42 +19,35 @@
 </head>
 <body>
 
-    <h2>Phòng Chat Realtime (GitHub + Supabase + Firebase)</h2>
+    <h2>Phòng Chat Realtime (Có báo đang soạn tin & Thiết bị)</h2>
     <div id="chat-box"></div>
+    <div id="typing-indicator"></div>
     
     <div class="input-group">
         <input type="text" id="username" placeholder="Tên của bạn..." style="flex: 0.3;">
-        <input type="text" id="message" placeholder="Nhập nội dung tin nhắn..." style="flex: 1;" onkeypress="handleKeyPress(event)">
+        <input type="text" id="message" placeholder="Nhập nội dung tin nhắn..." style="flex: 1;" oninput="notifyTyping()" onkeypress="handleKeyPress(event)">
         <button onclick="sendMessage()">Gửi</button>
     </div>
 
-    <!-- Tích hợp Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyA64s-uDWHU3jW3JPaCkk3g6vsItUxG_cM",
-            authDomain: "my-domain-2206.firebaseapp.com",
-            projectId: "my-domain-2206",
-            storageBucket: "my-domain-2206.firebasestorage.app",
-            messagingSenderId: "213982728791",
-            appId: "1:213982728791:web:64e871cfaeefc9fb75c912",
-            measurementId: "G-VDGPZXG829"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-    </script>
-
-    <!-- Xử lý logic Supabase Database & Realtime -->
     <script>
         const SUPABASE_URL = 'https://udoulctmeuffbmvivlot.supabase.co';
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_TuvhrqcChOpDgOVnHfx62A_SFO2bKaO';
 
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
         const chatBox = document.getElementById('chat-box');
+        const typingIndicator = document.getElementById('typing-indicator');
 
+        // 1. Tự động nhận diện thiết bị (PC hay Phone)
+        function getDeviceType() {
+            const ua = navigator.userAgent;
+            if (/android|iphone|ipad|ipod/i.test(ua)) {
+                return "Phone 📱";
+            }
+            return "PC 💻";
+        }
+        const currentDevice = getDeviceType();
+
+        // 2. Tải lịch sử tin nhắn cũ
         async function fetchMessages() {
             const { data, error } = await _supabase
                 .from('messages')
@@ -70,14 +65,17 @@
             }
         }
 
+        // 3. Hiển thị tin nhắn kèm nhãn thiết bị
         function displayMessage(msg) {
             const div = document.createElement('div');
             div.className = 'message-item';
-            div.innerHTML = `<strong>${escapeHtml(msg.username || "Ẩn danh")}:</strong> ${escapeHtml(msg.text || "")}`;
+            const deviceTag = msg.device ? `<span class="device-tag">${escapeHtml(msg.device)}</span>` : '';
+            div.innerHTML = `<strong>${escapeHtml(msg.username || "Ẩn danh")}</strong>${deviceTag}: ${escapeHtml(msg.text || "")}`;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
+        // 4. Gửi tin nhắn mới lên Database kèm thông tin thiết bị
         async function sendMessage() {
             const user = document.getElementById('username').value.trim() || "Ẩn danh";
             const text = document.getElementById('message').value.trim();
@@ -86,13 +84,14 @@
 
             const { error } = await _supabase
                 .from('messages')
-                .insert([{ username: user, text: text }]);
+                .insert([{ username: user, text: text, device: currentDevice }]);
 
             if (error) {
                 alert('Gửi tin nhắn thất bại! Chi tiết: ' + error.message);
-                console.error(error);
             } else {
                 document.getElementById('message').value = '';
+                // Gửi tín hiệu dừng typing ngay khi gửi xong
+                sendTypingStatus(false);
             }
         }
 
@@ -106,13 +105,55 @@
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        _supabase
-            .channel('public:messages')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-                displayMessage(payload.new);
-            })
-            .subscribe();
+        // --- HỆ THỐNG REALTIME CHANNEL (CHAT + TYPING INDICATOR) ---
+        const chatChannel = _supabase.channel('room_chat_global', {
+            config: { broadcast: { self: false } } // Không nhận lại sự kiện do chính mình phát ra
+        });
 
+        // Lắng nghe tin nhắn mới chèn vào database
+        chatChannel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+            displayMessage(payload.new);
+        });
+
+        // Lắng nghe sự kiện "Đang soạn tin" từ người khác qua Broadcast
+        let typingTimeout;
+        chatChannel.on('broadcast', { event: 'typing' }, payload => {
+            if (payload.isTyping) {
+                typingIndicator.innerText = `${payload.username} đang soạn tin nhắn... ✍️`;
+                clearTimeout(typingTimeout);
+                // Tự động ẩn thông báo sau 3 giây nếu người kia dừng gõ
+                typingTimeout = setTimeout(() => {
+                    typingIndicator.innerText = '';
+                }, 3000);
+            } else {
+                typingIndicator.innerText = '';
+            }
+        });
+
+        chatChannel.subscribe();
+
+        // Gửi trạng thái đang soạn tin khi người dùng gõ phím
+        function notifyTyping() {
+            const user = document.getElementById('username').value.trim() || "Ai đó";
+            chatChannel.send({
+                type: 'broadcast',
+                event: 'typing',
+                username: user,
+                isTyping: true
+            });
+        }
+
+        function sendTypingStatus(isTyping) {
+            const user = document.getElementById('username').value.trim() || "Ai đó";
+            chatChannel.send({
+                type: 'broadcast',
+                event: 'typing',
+                username: user,
+                isTyping: isTyping
+            });
+        }
+
+        // Chạy tải tin nhắn ban đầu
         fetchMessages();
     </script>
 </body>
