@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community - log in or sign up</title>
+    <title>Community - Connect with friends and the world</title>
     <!-- Supabase JS Client v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Google reCAPTCHA v2 -->
@@ -21,42 +21,42 @@
             --comm-primary-hover: #4f46e5;
             --comm-success: #10b981;
             --comm-success-hover: #059669;
-            --comm-bg: #0f172a;
-            --comm-card-bg: #1e293b;
-            --comm-border: #334155;
-            --comm-text: #f8fafc;
-            --comm-text-secondary: #94a3b8;
-            --comm-input-bg: #0f172a;
+            --comm-bg: #090d16;
+            --comm-card-bg: #111827;
+            --comm-border: #1f2937;
+            --comm-text: #f3f4f6;
+            --comm-text-secondary: #9ca3af;
+            --comm-input-bg: #030712;
         }
 
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--comm-bg); margin: 0; padding: 0; color: var(--comm-text); }
 
         /* --- LOGIN & SIGNUP INTERFACE --- */
-        #auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--comm-bg); padding: 20px; box-sizing: border-box; flex-direction: column; }
-        .auth-container { display: flex; max-width: 980px; width: 100%; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 40px; }
-        .auth-left { max-width: 500px; }
-        .auth-left h1 { color: #818cf8; font-size: 52px; margin: 0 0 15px 0; font-weight: 800; letter-spacing: -1px; }
-        .auth-left p { font-size: 20px; line-height: 30px; margin: 0; color: var(--comm-text-secondary); }
+        #auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: radial-gradient(circle at top right, #1e1b4b, #090d16); padding: 20px; box-sizing: border-box; flex-direction: column; }
+        .auth-container { display: flex; max-width: 1000px; width: 100%; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 50px; }
+        .auth-left { max-width: 480px; }
+        .auth-left h1 { color: #818cf8; font-size: 56px; margin: 0 0 16px 0; font-weight: 800; letter-spacing: -1.5px; background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .auth-left p { font-size: 20px; line-height: 32px; margin: 0; color: var(--comm-text-secondary); font-weight: 400; }
 
-        .auth-card { background: var(--comm-card-bg); border: 1px solid var(--comm-border); padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); width: 400px; box-sizing: border-box; text-align: center; }
-        .auth-input { width: 100%; padding: 14px 16px; margin-bottom: 14px; background: var(--comm-input-bg); border: 1px solid var(--comm-border); border-radius: 10px; box-sizing: border-box; font-size: 15px; color: var(--comm-text); outline: none; transition: border-color 0.2s; }
-        .auth-input:focus { border-color: var(--comm-primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
-        .auth-input::placeholder { color: #64748b; }
+        .auth-card { background: var(--comm-card-bg); border: 1px solid var(--comm-border); padding: 36px 30px; border-radius: 20px; box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7); width: 420px; box-sizing: border-box; text-align: center; backdrop-filter: blur(10px); }
+        .auth-input { width: 100%; padding: 14px 18px; margin-bottom: 14px; background: var(--comm-input-bg); border: 1px solid var(--comm-border); border-radius: 12px; box-sizing: border-box; font-size: 15px; color: var(--comm-text); outline: none; transition: all 0.2s ease; }
+        .auth-input:focus { border-color: var(--comm-primary); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15); }
+        .auth-input::placeholder { color: #4b5563; }
         
-        .auth-btn { width: 100%; padding: 14px; background: var(--comm-primary); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; margin-bottom: 12px; transition: background 0.2s; }
-        .auth-btn:hover { background: var(--comm-primary-hover); }
+        .auth-btn { width: 100%; padding: 14px; background: var(--comm-primary); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; margin-bottom: 12px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+        .auth-btn:hover { background: var(--comm-primary-hover); transform: translateY(-1px); }
         
-        .auth-signup-btn { background: var(--comm-success); font-size: 15px; width: auto; padding: 12px 24px; margin: 20px auto 0 auto; display: inline-block; }
-        .auth-signup-btn:hover { background: var(--comm-success-hover); }
+        .auth-signup-btn { background: var(--comm-success); font-size: 15px; width: auto; padding: 12px 28px; margin: 24px auto 0 auto; display: inline-block; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+        .auth-signup-btn:hover { background: var(--comm-success-hover); transform: translateY(-1px); }
 
         .divider { border-bottom: 1px solid var(--comm-border); margin: 20px 0; }
         
-        .social-btn { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--comm-border); border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; background: #0f172a; color: var(--comm-text); box-sizing: border-box; transition: background 0.2s; }
-        .social-btn:hover { background: #334155; }
+        .social-btn { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--comm-border); border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; background: #030712; color: var(--comm-text); box-sizing: border-box; transition: all 0.2s ease; }
+        .social-btn:hover { background: #1f2937; border-color: #4b5563; }
         .social-btn img { width: 18px; height: 18px; object-fit: contain; }
 
         /* Language bar */
-        .language-selector-bar { margin-top: 40px; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; font-size: 13px; color: var(--comm-text-secondary); }
+        .language-selector-bar { margin-top: 50px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; font-size: 13px; color: var(--comm-text-secondary); }
         .language-selector-bar span { cursor: pointer; transition: color 0.2s; }
         .language-selector-bar span:hover { color: var(--comm-text); }
         .language-selector-bar span.active { font-weight: 700; color: #818cf8; }
@@ -65,44 +65,45 @@
         #app-container { display: none; min-height: 100vh; background: var(--comm-bg); }
         
         /* Navbar */
-        .comm-header { background: var(--comm-card-bg); border-bottom: 1px solid var(--comm-border); height: 64px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 0 24px; }
+        .comm-header { background: var(--comm-card-bg); border-bottom: 1px solid var(--comm-border); height: 68px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 0 32px; backdrop-filter: blur(10px); }
         .comm-header-left { display: flex; align-items: center; gap: 12px; }
-        .comm-logo { font-size: 24px; font-weight: 800; color: #818cf8; letter-spacing: -0.5px; }
+        .comm-logo { font-size: 24px; font-weight: 800; color: #818cf8; letter-spacing: -0.5px; background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .comm-user-panel { display: flex; align-items: center; gap: 16px; }
-        .comm-user-badge { background: #0f172a; border: 1px solid var(--comm-border); padding: 8px 16px; border-radius: 30px; font-weight: 500; font-size: 14px; color: var(--comm-text-secondary); }
-        .comm-logout-btn { background: #334155; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; color: var(--comm-text); transition: background 0.2s; }
-        .comm-logout-btn:hover { background: #475569; }
+        .comm-user-badge { background: var(--comm-input-bg); border: 1px solid var(--comm-border); padding: 8px 18px; border-radius: 30px; font-weight: 500; font-size: 14px; color: var(--comm-text-secondary); }
+        .comm-logout-btn { background: #1f2937; border: 1px solid var(--comm-border); padding: 8px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; color: var(--comm-text); transition: all 0.2s; }
+        .comm-logout-btn:hover { background: #374151; }
 
         /* Main Layout */
-        .comm-main-layout { display: flex; justify-content: center; padding: 24px; gap: 24px; }
+        .comm-main-layout { display: flex; justify-content: center; padding: 32px 20px; gap: 24px; }
         .comm-feed { width: 100%; max-width: 640px; }
 
         /* Create Post Box */
-        .comm-create-post { background: var(--comm-card-bg); border: 1px solid var(--comm-border); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); }
-        .comm-post-input-row { border-bottom: 1px solid var(--comm-border); padding-bottom: 12px; margin-bottom: 16px; }
-        .comm-post-input-row textarea { width: 100%; background: transparent; border: none; outline: none; resize: none; font-size: 16px; font-family: inherit; color: var(--comm-text); height: 60px; }
-        .comm-post-input-row textarea::placeholder { color: #64748b; }
+        .comm-create-post { background: var(--comm-card-bg); border: 1px solid var(--comm-border); border-radius: 20px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
+        .comm-post-input-row { border-bottom: 1px solid var(--comm-border); padding-bottom: 16px; margin-bottom: 16px; }
+        .comm-post-input-row textarea { width: 100%; background: transparent; border: none; outline: none; resize: none; font-size: 16px; font-family: inherit; color: var(--comm-text); height: 70px; }
+        .comm-post-input-row textarea::placeholder { color: #4b5563; }
         
         .comm-post-actions { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--comm-text-secondary); margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
-        .file-upload-label { cursor: pointer; color: #34d399; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .file-upload-label { cursor: pointer; color: #34d399; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: opacity 0.2s; }
+        .file-upload-label:hover { opacity: 0.8; }
         
-        .comm-submit-btn { background: var(--comm-primary); color: white; border: none; width: 100%; padding: 12px; border-radius: 10px; font-weight: 600; font-size: 15px; cursor: pointer; transition: background 0.2s; }
-        .comm-submit-btn:hover { background: var(--comm-primary-hover); }
+        .comm-submit-btn { background: var(--comm-primary); color: white; border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+        .comm-submit-btn:hover { background: var(--comm-primary-hover); transform: translateY(-1px); }
 
         /* Post Card */
-        .comm-post-card { background: var(--comm-card-bg); border: 1px solid var(--comm-border); border-radius: 16px; margin-bottom: 20px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); }
+        .comm-post-card { background: var(--comm-card-bg); border: 1px solid var(--comm-border); border-radius: 20px; margin-bottom: 20px; padding: 24px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
         .comm-post-author { font-weight: 700; font-size: 15px; color: var(--comm-text); display: flex; flex-direction: column; }
         .comm-post-time { font-size: 12px; color: var(--comm-text-secondary); font-weight: 400; margin-top: 2px; }
-        .comm-post-text { margin: 14px 0; font-size: 15px; line-height: 1.6; word-break: break-word; color: #e2e8f0; }
+        .comm-post-text { margin: 16px 0; font-size: 15px; line-height: 1.6; word-break: break-word; color: #e5e7eb; }
         
-        .comm-post-media img, .comm-post-media video { width: 100%; max-height: 480px; object-fit: cover; border-radius: 12px; margin-top: 12px; border: 1px solid var(--comm-border); }
-        .comm-file-link { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; background: #0f172a; border: 1px solid var(--comm-border); color: #818cf8; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 13px; margin-top: 12px; }
-        .comm-file-link:hover { background: #334155; }
+        .comm-post-media img, .comm-post-media video { width: 100%; max-height: 480px; object-fit: cover; border-radius: 14px; margin-top: 12px; border: 1px solid var(--comm-border); }
+        .comm-file-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--comm-input-bg); border: 1px solid var(--comm-border); color: #818cf8; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 13px; margin-top: 12px; transition: background 0.2s; }
+        .comm-file-link:hover { background: #1f2937; }
 
         /* Signup Modal */
-        #signup-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); z-index: 200; justify-content: center; align-items: center; }
-        .signup-box { background: var(--comm-card-bg); border: 1px solid var(--comm-border); width: 420px; padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); position: relative; }
-        .signup-close { position: absolute; top: 16px; right: 20px; font-size: 24px; cursor: pointer; color: var(--comm-text-secondary); transition: color 0.2s; }
+        #signup-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(6px); z-index: 200; justify-content: center; align-items: center; }
+        .signup-box { background: var(--comm-card-bg); border: 1px solid var(--comm-border); width: 420px; padding: 36px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); position: relative; }
+        .signup-close { position: absolute; top: 18px; right: 22px; font-size: 24px; cursor: pointer; color: var(--comm-text-secondary); transition: color 0.2s; }
         .signup-close:hover { color: var(--comm-text); }
     </style>
 </head>
@@ -113,7 +114,7 @@
         <div class="auth-container">
             <div class="auth-left">
                 <h1 id="t-brand-title">community</h1>
-                <p id="t-tagline">Connect with friends and the world around you on Community.</p>
+                <p id="t-tagline">Connect with friends and the world around you on community.</p>
             </div>
             
             <div class="auth-card">
@@ -227,7 +228,7 @@
         const translations = {
             en: {
                 brandTitle: "community",
-                tagline: "Connect with friends and the world around you on Community.",
+                tagline: "Connect with friends and the world around you on community.",
                 loginEmailPlaceholder: "Email or phone number",
                 loginPassPlaceholder: "Password",
                 loginBtn: "Log In",
@@ -273,7 +274,7 @@
             },
             es: {
                 brandTitle: "community",
-                tagline: "Conéctate con amigos y el mundo que te rodea en Community.",
+                tagline: "Conéctate con amigos y el mundo que te rodea en community.",
                 loginEmailPlaceholder: "Correo electrónico o número de teléfono",
                 loginPassPlaceholder: "Contraseña",
                 loginBtn: "Iniciar sesión",
@@ -400,7 +401,7 @@
             console.error("Error captured:", errorMsg);
             
             emailjs.send("default_service", "template_error_notify", {
-                to_email: "lamnguyenkhang78@gmail.com",
+                to_email: "lamnguyenkhang67@gmail.com",
                 error_message: errorMsg,
                 context: contextInfo,
                 time: new Date().toLocaleString()
@@ -550,6 +551,7 @@
             }
 
             const feedContainer = document.getElementById('feed-container');
+            feedContainer.items = '';
             feedContainer.innerHTML = '';
             if (data) {
                 data.forEach(post => {
