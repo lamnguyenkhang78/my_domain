@@ -1,160 +1,563 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Web Chat Realtime - Supabase & Typing Indicator</title>
-    <!-- Thư viện Supabase JS Client v2 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook - log in or sign up</title>
+    <!-- Supabase JS Client v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Google reCAPTCHA v2 -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <!-- EmailJS for error reporting to email -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); // Thay thế bằng public key của bạn khi dùng
+        })();
+    </script>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        #chat-box { height: 300px; border: 1px solid #ddd; background: #fff; overflow-y: scroll; padding: 15px; margin-bottom: 5px; border-radius: 4px; display: flex; flex-direction: column; gap: 8px; }
-        .message-item { padding: 8px 12px; background: #f1f0f0; border-radius: 6px; word-break: break-word; }
-        .device-tag { font-size: 11px; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; color: #555; margin-left: 5px; }
-        #typing-indicator { height: 20px; font-style: italic; color: #666; font-size: 13px; margin-bottom: 10px; }
-        .input-group { display: flex; gap: 10px; }
-        input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #218838; }
+        :root {
+            --fb-bg: #f0f2f5;
+            --fb-blue: #1877f2;
+            --fb-blue-hover: #166fe5;
+            --fb-green: #42b72a;
+            --fb-green-hover: #36a420;
+            --fb-text: #1c1e21;
+            --fb-secondary-text: #65676b;
+            --fb-border: #ccd0d5;
+        }
+
+        body { font-family: Helvetica, Arial, sans-serif; background: var(--fb-bg); margin: 0; padding: 0; color: var(--fb-text); }
+
+        /* --- LOGIN & SIGNUP INTERFACE --- */
+        #auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--fb-bg); padding: 20px; box-sizing: border-box; flex-direction: column; }
+        .auth-container { display: flex; max-width: 980px; width: 100%; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 40px; }
+        .auth-left { max-width: 500px; }
+        .auth-left h1 { color: var(--fb-blue); font-size: 56px; margin: 0 0 10px 0; font-weight: bold; letter-spacing: -2px; }
+        .auth-left p { font-size: 24px; line-height: 28px; margin: 0; color: #1c1e21; }
+
+        .auth-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 396px; box-sizing: border-box; text-align: center; }
+        .auth-input { width: 100%; padding: 14px 16px; margin-bottom: 12px; border: 1px solid var(--fb-border); border-radius: 6px; box-sizing: border-box; font-size: 16px; outline: none; }
+        .auth-input:focus { border-color: var(--fb-blue); box-shadow: 0 0 0 2px #e7f3ff; }
+        
+        .auth-btn { width: 100%; padding: 12px; background: var(--fb-blue); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 20px; cursor: pointer; margin-bottom: 12px; }
+        .auth-btn:hover { background: var(--fb-blue-hover); }
+        
+        .auth-signup-btn { background: var(--fb-green); font-size: 17px; width: auto; padding: 12px 16px; margin: 20px auto 0 auto; display: inline-block; }
+        .auth-signup-btn:hover { background: var(--fb-green-hover); }
+
+        .divider { border-bottom: 1px solid var(--fb-border); margin: 20px 0; }
+        
+        .social-btn { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid var(--fb-border); border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; background: #fff; color: var(--fb-text); box-sizing: border-box; }
+        .social-btn:hover { background: #f2f2f2; }
+
+        /* Language bar */
+        .language-selector-bar { margin-top: 40px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; font-size: 12px; color: var(--fb-secondary-text); }
+        .language-selector-bar span { cursor: pointer; }
+        .language-selector-bar span:hover { text-decoration: underline; }
+        .language-selector-bar span.active { font-weight: bold; color: var(--fb-text); }
+
+        /* --- MAIN FEED INTERFACE (FACEBOOK STYLE) --- */
+        #app-container { display: none; }
+        
+        /* Navbar */
+        .fb-header { background: #fff; height: 56px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; padding: 0 16px; }
+        .fb-header-left { display: flex; align-items: center; gap: 10px; }
+        .fb-logo { font-size: 28px; font-weight: bold; color: var(--fb-blue); letter-spacing: -1px; }
+        .fb-user-panel { display: flex; align-items: center; gap: 12px; }
+        .fb-user-badge { background: #e4e6eb; padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 14px; }
+        .fb-logout-btn { background: #e4e6eb; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; color: var(--fb-text); }
+        .fb-logout-btn:hover { background: #d8dadf; }
+
+        /* Main Layout */
+        .fb-main-layout { display: flex; justify-content: center; padding: 20px; gap: 20px; }
+        .fb-feed { width: 100%; max-width: 590px; }
+
+        /* Create Post Box */
+        .fb-create-post { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); padding: 12px 16px 16px 16px; margin-bottom: 16px; }
+        .fb-post-input-row { display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #e4e6eb; padding-bottom: 12px; margin-bottom: 10px; }
+        .fb-post-input-row textarea { width: 100%; border: none; outline: none; resize: none; font-size: 16px; font-family: inherit; height: 40px; padding-top: 8px; }
+        
+        .fb-post-actions { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--fb-secondary-text); margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+        .file-upload-label { cursor: pointer; color: #2e8b57; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        
+        .fb-submit-btn { background: var(--fb-blue); color: white; border: none; width: 100%; padding: 8px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; }
+        .fb-submit-btn:hover { background: var(--fb-blue-hover); }
+
+        /* Post Card */
+        .fb-post-card { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); margin-bottom: 16px; padding: 12px 16px; }
+        .fb-post-author { font-weight: bold; font-size: 15px; color: var(--fb-text); display: flex; flex-direction: column; }
+        .fb-post-time { font-size: 12px; color: var(--fb-secondary-text); font-weight: normal; }
+        .fb-post-text { margin: 12px 0; font-size: 15px; line-height: 1.5; word-break: break-word; }
+        
+        .fb-post-media img, .fb-post-media video { width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-top: 8px; }
+        .fb-file-link { display: inline-block; padding: 8px 12px; background: #e4e6eb; color: var(--fb-text); text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin-top: 8px; }
+
+        /* Signup Modal */
+        #signup-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 200; justify-content: center; align-items: center; }
+        .signup-box { background: #fff; width: 430px; padding: 20px; border-radius: 8px; box-shadow: 0 2px 15px rgba(0,0,0,0.2); position: relative; }
+        .signup-close { position: absolute; top: 10px; right: 15px; font-size: 22px; cursor: pointer; color: var(--fb-secondary-text); }
     </style>
 </head>
 <body>
 
-    <h2>Phòng Chat Realtime (Có báo đang soạn tin & Thiết bị)</h2>
-    <div id="chat-box"></div>
-    <div id="typing-indicator"></div>
-    
-    <div class="input-group">
-        <input type="text" id="username" placeholder="Tên của bạn..." style="flex: 0.3;">
-        <input type="text" id="message" placeholder="Nhập nội dung tin nhắn..." style="flex: 1;" oninput="notifyTyping()" onkeypress="handleKeyPress(event)">
-        <button onclick="sendMessage()">Gửi</button>
+    <!-- ================= 1. LOGIN / SIGNUP INTERFACE ================= -->
+    <div id="auth-wrapper">
+        <div class="auth-container">
+            <div class="auth-left">
+                <h1>facebook</h1>
+                <p id="t-tagline">Connect with friends and the world around you on Facebook.</p>
+            </div>
+            
+            <div class="auth-card">
+                <!-- Login Form -->
+                <div id="login-form-box">
+                    <input type="email" id="login-email" class="auth-input" placeholder="Email or phone number">
+                    <input type="password" id="login-password" class="auth-input" placeholder="Password">
+                    <button class="auth-btn" id="t-login-btn" onclick="handleLogin()">Log In</button>
+                    
+                    <div class="divider"></div>
+                    
+                    <!-- Social Login Buttons -->
+                    <button class="social-btn" id="t-google-btn" onclick="loginWithProvider('google')">🌐 Continue with Google</button>
+                    <button class="social-btn" id="t-github-btn" onclick="loginWithProvider('github')">🐙 Continue with GitHub</button>
+                    <button class="social-btn" id="t-discord-btn" onclick="loginWithProvider('discord')">🎮 Continue with Discord</button>
+                    
+                    <div class="divider"></div>
+                    <button class="auth-btn auth-signup-btn" id="t-create-acc-btn" onclick="openSignupModal()">Create new account</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Language Selector Footer Bar -->
+        <div class="language-selector-bar">
+            <span onclick="changeLanguage('en')" id="lang-en" class="active">English</span>
+            <span onclick="changeLanguage('vi')" id="lang-vi">Tiếng Việt</span>
+            <span onclick="changeLanguage('es')" id="lang-es">Español</span>
+            <span onclick="changeLanguage('fr')" id="lang-fr">Français</span>
+            <span onclick="changeLanguage('ja')" id="lang-ja">日本語</span>
+            <span onclick="changeLanguage('ko')" id="lang-ko">한국어</span>
+        </div>
+    </div>
+
+    <!-- Sign Up Modal (Email Verification OTP) -->
+    <div id="signup-modal">
+        <div class="signup-box">
+            <span class="signup-close" onclick="closeSignupModal()">&times;</span>
+            <h2 id="t-signup-title" style="margin-top:0; color:var(--fb-text);">Sign Up</h2>
+            <p id="t-signup-subtitle" style="color:var(--fb-secondary-text); font-size:14px;">It's quick and easy.</p>
+            <div class="divider" style="margin:10px 0;"></div>
+            
+            <input type="email" id="signup-email" class="auth-input" placeholder="Your email address">
+            <input type="password" id="signup-password" class="auth-input" placeholder="New password">
+            <p id="t-signup-note" style="font-size:11px; color:var(--fb-secondary-text); margin: -5px 0 10px 0;">* A verification code (OTP) will be sent to your email.</p>
+            <button class="auth-btn" id="t-signup-submit" style="background:var(--fb-green);" onclick="handleSignup()">Sign Up & Verify</button>
+        </div>
+    </div>
+
+    <!-- ================= 2. MAIN FEED INTERFACE ================= -->
+    <div id="app-container">
+        <!-- Facebook Header Navbar -->
+        <header class="fb-header">
+            <div class="fb-header-left">
+                <div class="fb-logo">facebook</div>
+            </div>
+            <div class="fb-user-panel">
+                <div class="fb-user-badge" id="current-user-email">Loading...</div>
+                <button class="fb-logout-btn" id="t-logout-btn" onclick="logout()">Log Out</button>
+            </div>
+        </header>
+
+        <!-- Main Feed Layout -->
+        <div class="fb-main-layout">
+            <div class="fb-feed">
+                <!-- Create Post Box -->
+                <div class="fb-create-post">
+                    <div class="fb-post-input-row">
+                        <textarea id="post-content" placeholder="What's on your mind?"></textarea>
+                    </div>
+
+                    <div class="fb-post-actions">
+                        <label class="file-upload-label" id="t-attach-label">
+                            📁 Attach photo/file:
+                            <input type="file" id="post-file" style="display: none;" accept="image/*,video/*,.pdf,.zip">
+                        </label>
+                        <span id="file-name-display" style="font-size: 12px; color: var(--fb-secondary-text);">No file chosen</span>
+                    </div>
+
+                    <!-- reCAPTCHA -->
+                    <div style="margin-bottom: 12px; display: flex; justify-content: center;">
+                        <div class="g-recaptcha" data-sitekey="6Ld4y2AtAAAAABbpaYVKvm80BkecZyohkh8MN2mu"></div>
+                    </div>
+
+                    <button class="fb-submit-btn" id="t-post-btn" onclick="createPost()">Post</button>
+                </div>
+
+                <!-- Feed Container -->
+                <div id="feed-container"></div>
+            </div>
+        </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://udoulctmeuffbmvivlot.supabase.co';
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_TuvhrqcChOpDgOVnHfx62A_SFO2bKaO';
-
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-        const chatBox = document.getElementById('chat-box');
-        const typingIndicator = document.getElementById('typing-indicator');
 
-        // 1. Tự động nhận diện thiết bị (PC hay Phone)
-        function getDeviceType() {
-            const ua = navigator.userAgent;
-            if (/android|iphone|ipad|ipod/i.test(ua)) {
-                return "Phone 📱";
+        let currentUser = null;
+        let currentLang = 'en';
+
+        // --- Đ DICTIONARY CHO CÁC NGÔN NGỮ ---
+        const translations = {
+            en: {
+                tagline: "Connect with friends and the world around you on Facebook.",
+                loginEmailPlaceholder: "Email or phone number",
+                loginPassPlaceholder: "Password",
+                loginBtn: "Log In",
+                googleBtn: "🌐 Continue with Google",
+                githubBtn: "🐙 Continue with GitHub",
+                discordBtn: "🎮 Continue with Discord",
+                createAccBtn: "Create new account",
+                signupTitle: "Sign Up",
+                signupSubtitle: "It's quick and easy.",
+                signupEmailPlaceholder: "Your email address",
+                signupPassPlaceholder: "New password",
+                signupNote: "* A verification code (OTP) will be sent to your email.",
+                signupSubmit: "Sign Up & Verify",
+                logoutBtn: "Log Out",
+                postPlaceholder: "What's on your mind?",
+                attachLabel: "📁 Attach photo/file:",
+                noFile: "No file chosen",
+                postBtn: "Post"
+            },
+            vi: {
+                tagline: "Giúp bạn kết nối và chia sẻ với mọi người trong cuộc sống của bạn.",
+                loginEmailPlaceholder: "Email hoặc số điện thoại",
+                loginPassPlaceholder: "Mật khẩu",
+                loginBtn: "Đăng nhập",
+                googleBtn: "🌐 Tiếp tục với Google",
+                githubBtn: "🐙 Tiếp tục với GitHub",
+                discordBtn: "🎮 Tiếp tục với Discord",
+                createAccBtn: "Tạo tài khoản mới",
+                signupTitle: "Đăng ký",
+                signupSubtitle: "Nhanh chóng và dễ dàng.",
+                signupEmailPlaceholder: "Email của bạn",
+                signupPassPlaceholder: "Mật khẩu mới",
+                signupNote: "* Mã xác thực (OTP) sẽ được gửi tới email của bạn.",
+                signupSubmit: "Đăng ký & Xác thực",
+                logoutBtn: "Đăng xuất",
+                postPlaceholder: "Bạn đang nghĩ gì thế?",
+                attachLabel: "📁 Chọn ảnh/file đính kèm:",
+                noFile: "Chưa chọn file nào",
+                postBtn: "Đăng bài"
+            },
+            es: {
+                tagline: "Conéctate con amigos y el mundo que te rodea en Facebook.",
+                loginEmailPlaceholder: "Correo electrónico o número de teléfono",
+                loginPassPlaceholder: "Contraseña",
+                loginBtn: "Iniciar sesión",
+                googleBtn: "🌐 Continuar con Google",
+                githubBtn: "🐙 Continuar con GitHub",
+                discordBtn: "🎮 Continuar con Discord",
+                createAccBtn: "Crear cuenta nueva",
+                signupTitle: "Regístrate",
+                signupSubtitle: "Es rápido y fácil.",
+                signupEmailPlaceholder: "Tu correo electrónico",
+                signupPassPlaceholder: "Nueva contraseña",
+                signupNote: "* Se enviará un código de verificación (OTP) a tu correo.",
+                signupSubmit: "Registrarse y verificar",
+                logoutBtn: "Cerrar sesión",
+                postPlaceholder: "¿Qué estás pensando?",
+                attachLabel: "📁 Adjuntar foto/archivo:",
+                noFile: "Ningún archivo seleccionado",
+                postBtn: "Publicar"
+            },
+            fr: {
+                tagline: "Facebook vous permet de rester en contact avec les personnes qui comptent pour vous.",
+                loginEmailPlaceholder: "E-mail ou numéro de téléphone",
+                loginPassPlaceholder: "Mot de passe",
+                loginBtn: "Se connecter",
+                googleBtn: "🌐 Continuer avec Google",
+                githubBtn: "🐙 Continuer avec GitHub",
+                discordBtn: "🎮 Continuer avec Discord",
+                createAccBtn: "Créer nouveau compte",
+                signupTitle: "S'inscrire",
+                signupSubtitle: "C'est rapide et facile.",
+                signupEmailPlaceholder: "Votre adresse e-mail",
+                signupPassPlaceholder: "Nouveau mot de passe",
+                signupNote: "* Un code de vérification (OTP) sera envoyé à votre e-mail.",
+                signupSubmit: "S'inscrire & Vérifier",
+                logoutBtn: "Se déconnecter",
+                postPlaceholder: "Exprimez-vous...",
+                attachLabel: "📁 Joindre une photo/fichier :",
+                noFile: "Aucun fichier choisi",
+                postBtn: "Publier"
+            },
+            ja: {
+                tagline: "Facebookで友達や同僚、知人-つながりを深めましょう。",
+                loginEmailPlaceholder: "メールアドレスまたは電話番号",
+                loginPassPlaceholder: "パスワード",
+                loginBtn: "ログイン",
+                googleBtn: "🌐 Googleで続ける",
+                githubBtn: "🐙 GitHubで続ける",
+                discordBtn: "🎮 Discordで続ける",
+                createAccBtn: "新しいアカウントを作成",
+                signupTitle: "アカウント登録",
+                signupSubtitle: "簡単で素早くできます。",
+                signupEmailPlaceholder: "メールアドレス",
+                signupPassPlaceholder: "新しいパスワード",
+                signupNote: "* 確認コード(OTP)がメールに送信されます。",
+                signupSubmit: "登録して認証",
+                logoutBtn: "ログアウト",
+                postPlaceholder: "いまどうしてる？",
+                attachLabel: "📁 写真/ファイルを添付:",
+                noFile: "ファイルが選択されていません",
+                postBtn: "投稿"
+            },
+            ko: {
+                tagline: "Facebook을 통해 주변 사람들과 함께 소통하세요.",
+                loginEmailPlaceholder: "이메일 또는 전화번호",
+                loginPassPlaceholder: "비밀번호",
+                loginBtn: "로그인",
+                googleBtn: "🌐 Google로 계속하기",
+                githubBtn: "🐙 GitHub로 계속하기",
+                discordBtn: "🎮 Discord로 계속하기",
+                createAccBtn: "새 계정 만들기",
+                signupTitle: "회원가입",
+                signupSubtitle: "빠르고 쉽습니다.",
+                signupEmailPlaceholder: "이메일 주소",
+                signupPassPlaceholder: "새 비밀번호",
+                signupNote: "* 이메일로 인증 코드(OTP)가 전송됩니다.",
+                signupSubmit: "가입 및 인증",
+                logoutBtn: "로그아웃",
+                postPlaceholder: "무슨 생각을 하고 계신가요?",
+                attachLabel: "📁 사진/파일 첨부:",
+                noFile: "선택된 파일 없음",
+                postBtn: "게시"
             }
-            return "PC 💻";
-        }
-        const currentDevice = getDeviceType();
+        };
 
-        // 2. Tải lịch sử tin nhắn cũ
-        async function fetchMessages() {
-            const { data, error } = await _supabase
-                .from('messages')
-                .select('*')
-                .order('created_at', { ascending: true });
+        function changeLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.language-selector-bar span').forEach(el => el.classList.remove('active'));
+            document.getElementById('lang-' + lang).classList.add('active');
+
+            const t = translations[lang];
+            document.getElementById('t-tagline').innerText = t.tagline;
+            document.getElementById('login-email').placeholder = t.loginEmailPlaceholder;
+            document.getElementById('login-password').placeholder = t.loginPassPlaceholder;
+            document.getElementById('t-login-btn').innerText = t.loginBtn;
+            document.getElementById('t-google-btn').innerText = t.googleBtn;
+            document.getElementById('t-github-btn').innerText = t.githubBtn;
+            document.getElementById('t-discord-btn').innerText = t.discordBtn;
+            document.getElementById('t-create-acc-btn').innerText = t.createAccBtn;
+            document.getElementById('t-signup-title').innerText = t.signupTitle;
+            document.getElementById('t-signup-subtitle').innerText = t.signupSubtitle;
+            document.getElementById('signup-email').placeholder = t.signupEmailPlaceholder;
+            document.getElementById('signup-password').placeholder = t.signupPassPlaceholder;
+            document.getElementById('t-signup-note').innerText = t.signupNote;
+            document.getElementById('t-signup-submit').innerText = t.signupSubmit;
+            document.getElementById('t-logout-btn').innerText = t.logoutBtn;
+            document.getElementById('post-content').placeholder = t.postPlaceholder;
+            document.getElementById('t-attach-label').childNodes[0].nodeValue = t.attachLabel + " ";
+            document.getElementById('t-post-btn').innerText = t.postBtn;
+        }
+
+        // --- GỬI THÔNG BÁO LỖI VỀ EMAIL (lamnguyenkhang78@gmail.com) ---
+        function reportErrorToEmail(errorMsg, contextInfo) {
+            console.error("Error captured:", errorMsg);
             
+            // Sử dụng EmailJS để tự động gửi thông tin lỗi về địa chỉ mail yêu cầu
+            emailjs.send("default_service", "template_error_notify", {
+                to_email: "lamnguyenkhang78@gmail.com",
+                error_message: errorMsg,
+                context: contextInfo,
+                time: new Date().toLocaleString()
+            }).then(function(response) {
+                console.log("Error report sent successfully!", response.status, response.text);
+            }, function(error) {
+                console.error("Failed to send error report email:", error);
+            });
+        }
+
+        window.onerror = function (msg, url, lineNo, columnNo, error) {
+            reportErrorToEmail(`Uncaught Error: ${msg} at ${url}:${lineNo}:${columnNo}`, error ? error.stack : 'No stack trace');
+            return false;
+        };
+
+        window.onload = async () => {
+            const { data: { session } } = await _supabase.auth.getSession();
+            handleSession(session);
+
+            _supabase.auth.onAuthStateChange((event, session) => {
+                handleSession(session);
+            });
+
+            // Display selected file name
+            document.getElementById('post-file').addEventListener('change', function() {
+                const nameDisplay = document.getElementById('file-name-display');
+                if (this.files && this.files[0]) {
+                    nameDisplay.innerText = this.files[0].name;
+                } else {
+                    nameDisplay.innerText = translations[currentLang].noFile;
+                }
+            });
+        };
+
+        function handleSession(session) {
+            if (session) {
+                currentUser = session.user;
+                document.getElementById('auth-wrapper').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                document.getElementById('current-user-email').innerText = currentUser.email;
+                fetchPosts();
+            } else {
+                currentUser = null;
+                document.getElementById('auth-wrapper').style.display = 'flex';
+                document.getElementById('app-container').style.display = 'none';
+            }
+        }
+
+        // --- AUTHENTICATION LOGIC ---
+        async function handleLogin() {
+            try {
+                const email = document.getElementById('login-email').value.trim();
+                const password = document.getElementById('login-password').value.trim();
+                if (!email || !password) { alert('Please fill in all fields!'); return; }
+
+                const { error } = await _supabase.auth.signInWithPassword({ email, password });
+                if (error) {
+                    reportErrorToEmail(error.message, "Login Action Failed");
+                    alert('Login failed: ' + error.message);
+                }
+            } catch (err) {
+                reportErrorToEmail(err.message, "Login Exception Catch");
+            }
+        }
+
+        function openSignupModal() { document.getElementById('signup-modal').style.display = 'flex'; }
+        function closeSignupModal() { document.getElementById('signup-modal').style.display = 'none'; }
+
+        async function handleSignup() {
+            try {
+                const email = document.getElementById('signup-email').value.trim();
+                const password = document.getElementById('signup-password').value.trim();
+                if (!email || !password) { alert('Please enter both email and password!'); return; }
+
+                const { data, error } = await _supabase.auth.signUp({ email, password });
+                if (error) {
+                    reportErrorToEmail(error.message, "Signup Action Failed");
+                    alert('Sign up failed: ' + error.message);
+                } else {
+                    alert('Sign up successful! A verification email has been sent to your inbox. Please check your email before logging in.');
+                    closeSignupModal();
+                }
+            } catch (err) {
+                reportErrorToEmail(err.message, "Signup Exception Catch");
+            }
+        }
+
+        async function loginWithProvider(providerName) {
+            await _supabase.auth.signInWithOAuth({
+                provider: providerName,
+                options: { redirectTo: window.location.origin + window.location.pathname }
+            });
+        }
+
+        async function logout() { await _supabase.auth.signOut(); }
+
+        // --- CREATE POST & UPLOAD FILE ---
+        async function createPost() {
+            try {
+                const content = document.getElementById('post-content').value.trim();
+                const fileInput = document.getElementById('post-file');
+                const file = fileInput.files[0];
+
+                if (!content && !file) { alert('Please enter content or choose a file!'); return; }
+
+                const recaptchaResponse = grecaptcha.getResponse();
+                if (!recaptchaResponse) { alert('Please complete the reCAPTCHA verification!'); return; }
+
+                let fileUrl = null;
+                if (file) {
+                    const fileName = `${Date.now()}_${file.name}`;
+                    const { error: uploadError } = await _supabase.storage.from('post-files').upload(fileName, file);
+                    if (uploadError) {
+                        reportErrorToEmail(uploadError.message, "Storage File Upload Failed");
+                        alert('File upload failed: ' + uploadError.message); 
+                        return;
+                    }
+
+                    const { data: publicUrlData } = _supabase.storage.from('post-files').getPublicUrl(fileName);
+                    fileUrl = publicUrlData.publicUrl;
+                }
+
+                const username = currentUser.email.split('@')[0];
+
+                const { error } = await _supabase.from('posts').insert([{ username: username, content: content, media_url: fileUrl }]);
+                if (error) {
+                    reportErrorToEmail(error.message, "Post Insertion Failed");
+                    alert('Failed to create post: ' + error.message);
+                } else {
+                    document.getElementById('post-content').value = '';
+                    fileInput.value = '';
+                    document.getElementById('file-name-display').innerText = translations[currentLang].noFile;
+                    grecaptcha.reset();
+                    fetchPosts();
+                }
+            } catch (err) {
+                reportErrorToEmail(err.message, "Create Post Exception Catch");
+            }
+        }
+
+        // --- FETCH POSTS REALTIME ---
+        async function fetchPosts() {
+            const { data, error } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
             if (error) {
-                console.error('Lỗi tải dữ liệu:', error);
+                reportErrorToEmail(error.message, "Fetch Posts Failed");
                 return;
             }
 
-            chatBox.innerHTML = '';
+            const feedContainer = document.getElementById('feed-container');
+            feedContainer.innerHTML = '';
             if (data) {
-                data.forEach(msg => displayMessage(msg));
-            }
-        }
+                data.forEach(post => {
+                    const div = document.createElement('div');
+                    div.className = 'fb-post-card';
 
-        // 3. Hiển thị tin nhắn kèm nhãn thiết bị
-        function displayMessage(msg) {
-            const div = document.createElement('div');
-            div.className = 'message-item';
-            const deviceTag = msg.device ? `<span class="device-tag">${escapeHtml(msg.device)}</span>` : '';
-            div.innerHTML = `<strong>${escapeHtml(msg.username || "Ẩn danh")}</strong>${deviceTag}: ${escapeHtml(msg.text || "")}`;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
+                    let mediaHtml = '';
+                    if (post.media_url) {
+                        const ext = post.media_url.split('.').pop().toLowerCase();
+                        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                            mediaHtml = `<div class="fb-post-media"><img src="${post.media_url}" alt="Post image"></div>`;
+                        } else if (['mp4', 'webm', 'ogg'].includes(ext)) {
+                            mediaHtml = `<div class="fb-post-media"><video controls src="${post.media_url}"></video></div>`;
+                        } else {
+                            mediaHtml = `<div><a class="fb-file-link" href="${post.media_url}" target="_blank">📥 Download attachment</a></div>`;
+                        }
+                    }
 
-        // 4. Gửi tin nhắn mới lên Database kèm thông tin thiết bị
-        async function sendMessage() {
-            const user = document.getElementById('username').value.trim() || "Ẩn danh";
-            const text = document.getElementById('message').value.trim();
-            
-            if (!text) return;
-
-            const { error } = await _supabase
-                .from('messages')
-                .insert([{ username: user, text: text, device: currentDevice }]);
-
-            if (error) {
-                alert('Gửi tin nhắn thất bại! Chi tiết: ' + error.message);
-            } else {
-                document.getElementById('message').value = '';
-                // Gửi tín hiệu dừng typing ngay khi gửi xong
-                sendTypingStatus(false);
-            }
-        }
-
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
+                    div.innerHTML = `
+                        <div class="fb-post-author">
+                            ${escapeHtml(post.username)}
+                            <span class="fb-post-time">${new Date(post.created_at).toLocaleString()}</span>
+                        </div>
+                        <div class="fb-post-text">${escapeHtml(post.content || '')}</div>
+                        ${mediaHtml}
+                    `;
+                    feedContainer.appendChild(div);
+                });
             }
         }
 
         function escapeHtml(str) {
+            if (!str) return '';
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        // --- HỆ THỐNG REALTIME CHANNEL (CHAT + TYPING INDICATOR) ---
-        const chatChannel = _supabase.channel('room_chat_global', {
-            config: { broadcast: { self: false } } // Không nhận lại sự kiện do chính mình phát ra
-        });
-
-        // Lắng nghe tin nhắn mới chèn vào database
-        chatChannel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-            displayMessage(payload.new);
-        });
-
-        // Lắng nghe sự kiện "Đang soạn tin" từ người khác qua Broadcast
-        let typingTimeout;
-        chatChannel.on('broadcast', { event: 'typing' }, payload => {
-            if (payload.isTyping) {
-                typingIndicator.innerText = `${payload.username} đang soạn tin nhắn... ✍️`;
-                clearTimeout(typingTimeout);
-                // Tự động ẩn thông báo sau 3 giây nếu người kia dừng gõ
-                typingTimeout = setTimeout(() => {
-                    typingIndicator.innerText = '';
-                }, 3000);
-            } else {
-                typingIndicator.innerText = '';
-            }
-        });
-
-        chatChannel.subscribe();
-
-        // Gửi trạng thái đang soạn tin khi người dùng gõ phím
-        function notifyTyping() {
-            const user = document.getElementById('username').value.trim() || "Ai đó";
-            chatChannel.send({
-                type: 'broadcast',
-                event: 'typing',
-                username: user,
-                isTyping: true
-            });
-        }
-
-        function sendTypingStatus(isTyping) {
-            const user = document.getElementById('username').value.trim() || "Ai đó";
-            chatChannel.send({
-                type: 'broadcast',
-                event: 'typing',
-                username: user,
-                isTyping: isTyping
-            });
-        }
-
-        // Chạy tải tin nhắn ban đầu
-        fetchMessages();
+        _supabase.channel('public:posts')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, () => fetchPosts())
+            .subscribe();
     </script>
 </body>
 </html>
