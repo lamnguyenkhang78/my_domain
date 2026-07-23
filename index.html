@@ -53,13 +53,21 @@
         
         .social-btn { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--comm-border); border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; background: #030712; color: var(--comm-text); box-sizing: border-box; transition: all 0.2s ease; }
         .social-btn:hover { background: #1f2937; border-color: #4b5563; }
-        .social-btn img { width: 18px; height: 18px; object-fit: contain; }
+        .social-btn img, .social-btn svg { width: 18px; height: 18px; object-fit: contain; }
 
         /* Language bar */
         .language-selector-bar { margin-top: 50px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; font-size: 13px; color: var(--comm-text-secondary); }
         .language-selector-bar span { cursor: pointer; transition: color 0.2s; }
         .language-selector-bar span:hover { color: var(--comm-text); }
         .language-selector-bar span.active { font-weight: 700; color: #818cf8; }
+
+        /* --- CUSTOM MODAL ALERT DIALOG --- */
+        #custom-alert-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(6px); z-index: 9999; justify-content: center; align-items: center; }
+        .custom-alert-box { background: var(--comm-card-bg); border: 1px solid var(--comm-border); width: 380px; padding: 30px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); text-align: center; }
+        .custom-alert-title { font-size: 18px; font-weight: 700; color: var(--comm-text); margin-bottom: 10px; }
+        .custom-alert-msg { font-size: 14px; color: var(--comm-text-secondary); margin-bottom: 24px; line-height: 1.5; word-break: break-word; }
+        .custom-alert-btn { background: var(--comm-primary); color: white; border: none; padding: 12px 30px; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); transition: all 0.2s; }
+        .custom-alert-btn:hover { background: var(--comm-primary-hover); }
 
         /* --- MAIN FEED INTERFACE --- */
         #app-container { display: none; min-height: 100vh; background: var(--comm-bg); }
@@ -109,6 +117,15 @@
 </head>
 <body>
 
+    <!-- ================= CUSTOM MODAL ALERT DIALOG ================= -->
+    <div id="custom-alert-overlay">
+        <div class="custom-alert-box">
+            <div class="custom-alert-title" id="custom-alert-title">Notice</div>
+            <div class="custom-alert-msg" id="custom-alert-msg">Message here...</div>
+            <button class="custom-alert-btn" onclick="closeCustomAlert()">OK</button>
+        </div>
+    </div>
+
     <!-- ================= 1. LOGIN / SIGNUP INTERFACE ================= -->
     <div id="auth-wrapper">
         <div class="auth-container">
@@ -134,10 +151,10 @@
                         <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" alt="Facebook logo"> Continue with Facebook
                     </button>
                     <button class="social-btn" id="t-github-btn" onclick="loginWithProvider('github')">
-                        <img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub logo"> Continue with GitHub
+                        <svg height="18" width="18" viewBox="0 0 16 16" version="1.1" aria-hidden="true"><path fill="#f3f4f6" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg> Continue with GitHub
                     </button>
                     <button class="social-btn" id="t-discord-btn" onclick="loginWithProvider('discord')">
-                        <img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png" alt="Discord logo"> Continue with Discord
+                        <svg height="18" width="18" viewBox="0 0 127.14 96.36" version="1.1"><path fill="#5865F2" d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.15c2.65-27.28-4.51-51.19-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5.18-12.72,11.45-12.72S53.9,46,53.88,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.2,60,73.2,53s5.18-12.72,11.49-12.72S96.18,46,96.15,53,91,65.69,84.69,65.69Z"/></svg> Continue with Discord
                     </button>
                     
                     <div class="divider"></div>
@@ -223,6 +240,17 @@
 
         let currentUser = null;
         let currentLang = 'en';
+
+        // --- CUSTOM ALERT DIALOG FUNCTION ---
+        function showCustomAlert(message, title = "Notice") {
+            document.getElementById('custom-alert-title').innerText = title;
+            document.getElementById('custom-alert-msg').innerText = message;
+            document.getElementById('custom-alert-overlay').style.display = 'flex';
+        }
+
+        function closeCustomAlert() {
+            document.getElementById('custom-alert-overlay').style.display = 'none';
+        }
 
         // --- DICTIONARY CHO CÁC NGÔN NGỮ ---
         const translations = {
@@ -380,8 +408,8 @@
             
             document.getElementById('t-google-btn').innerHTML = `<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo"> ${t.googleBtn}`;
             document.getElementById('t-facebook-btn').innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" alt="Facebook logo"> ${t.facebookBtn}`;
-            document.getElementById('t-github-btn').innerHTML = `<img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub logo"> ${t.githubBtn}`;
-            document.getElementById('t-discord-btn').innerHTML = `<img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png" alt="Discord logo"> ${t.discordBtn}`;
+            document.getElementById('t-github-btn').innerHTML = `<svg height="18" width="18" viewBox="0 0 16 16" version="1.1" aria-hidden="true"><path fill="#f3f4f6" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg> ${t.githubBtn}`;
+            document.getElementById('t-discord-btn').innerHTML = `<svg height="18" width="18" viewBox="0 0 127.14 96.36" version="1.1"><path fill="#5865F2" d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.15c2.65-27.28-4.51-51.19-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5.18-12.72,11.45-12.72S53.9,46,53.88,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.2,60,73.2,53s5.18-12.72,11.49-12.72S96.18,46,96.15,53,91,65.69,84.69,65.69Z"/></svg> ${t.discordBtn}`;
 
             document.getElementById('t-create-acc-btn').innerText = t.createAccBtn;
             document.getElementById('t-signup-title').innerText = t.signupTitle;
@@ -455,12 +483,12 @@
             try {
                 const email = document.getElementById('login-email').value.trim();
                 const password = document.getElementById('login-password').value.trim();
-                if (!email || !password) { alert('Please fill in all fields!'); return; }
+                if (!email || !password) { showCustomAlert('Please fill in all fields!'); return; }
 
                 const { error } = await _supabase.auth.signInWithPassword({ email, password });
                 if (error) {
                     reportErrorToEmail(error.message, "Login Action Failed");
-                    alert('Login failed: ' + error.message);
+                    showCustomAlert('Login failed: ' + error.message);
                 }
             } catch (err) {
                 reportErrorToEmail(err.message, "Login Exception Catch");
@@ -474,14 +502,14 @@
             try {
                 const email = document.getElementById('signup-email').value.trim();
                 const password = document.getElementById('signup-password').value.trim();
-                if (!email || !password) { alert('Please enter both email and password!'); return; }
+                if (!email || !password) { showCustomAlert('Please enter both email and password!'); return; }
 
                 const { data, error } = await _supabase.auth.signUp({ email, password });
                 if (error) {
                     reportErrorToEmail(error.message, "Signup Action Failed");
-                    alert('Sign up failed: ' + error.message);
+                    showCustomAlert('Sign up failed: ' + error.message);
                 } else {
-                    alert('Sign up successful! A verification email has been sent to your inbox. Please check your email before logging in.');
+                    showCustomAlert('Sign up successful! A verification email has been sent to your inbox. Please check your email before logging in.');
                     closeSignupModal();
                 }
             } catch (err) {
@@ -490,9 +518,10 @@
         }
 
         async function loginWithProvider(providerName) {
+            const currentOrigin = window.location.origin + window.location.pathname;
             await _supabase.auth.signInWithOAuth({
                 provider: providerName,
-                options: { redirectTo: window.location.origin + window.location.pathname }
+                options: { redirectTo: currentOrigin }
             });
         }
 
@@ -505,10 +534,10 @@
                 const fileInput = document.getElementById('post-file');
                 const file = fileInput.files[0];
 
-                if (!content && !file) { alert('Please enter content or choose a file!'); return; }
+                if (!content && !file) { showCustomAlert('Please enter content or choose a file!'); return; }
 
                 const recaptchaResponse = grecaptcha.getResponse();
-                if (!recaptchaResponse) { alert('Please complete the reCAPTCHA verification!'); return; }
+                if (!recaptchaResponse) { showCustomAlert('Please complete the reCAPTCHA verification!'); return; }
 
                 let fileUrl = null;
                 if (file) {
@@ -516,7 +545,7 @@
                     const { error: uploadError } = await _supabase.storage.from('post-files').upload(fileName, file);
                     if (uploadError) {
                         reportErrorToEmail(uploadError.message, "Storage File Upload Failed");
-                        alert('File upload failed: ' + uploadError.message); 
+                        showCustomAlert('File upload failed: ' + uploadError.message); 
                         return;
                     }
 
@@ -529,7 +558,7 @@
                 const { error } = await _supabase.from('posts').insert([{ username: username, content: content, media_url: fileUrl }]);
                 if (error) {
                     reportErrorToEmail(error.message, "Post Insertion Failed");
-                    alert('Failed to create post: ' + error.message);
+                    showCustomAlert('Failed to create post: ' + error.message);
                 } else {
                     document.getElementById('post-content').value = '';
                     fileInput.value = '';
@@ -575,7 +604,7 @@
                             ${escapeHtml(post.username)}
                             <span class="comm-post-time">${new Date(post.created_at).toLocaleString()}</span>
                         </div>
-                        <div class="comm-post-text">${escapeHtml(post.content || '')}</div>
+                        <div class="comm-post-text">${escapeHtml(post.content ||)}</div>
                         ${mediaHtml}
                     `;
                     feedContainer.appendChild(div);
