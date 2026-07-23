@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facebook - log in or sign up</title>
+    <title>Community - log in or sign up</title>
     <!-- Supabase JS Client v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Google reCAPTCHA v2 -->
@@ -12,91 +12,98 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
-            emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); // Thay thế bằng public key của bạn khi dùng
+            emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
         })();
     </script>
     <style>
         :root {
-            --fb-bg: #f0f2f5;
-            --fb-blue: #1877f2;
-            --fb-blue-hover: #166fe5;
-            --fb-green: #42b72a;
-            --fb-green-hover: #36a420;
-            --fb-text: #1c1e21;
-            --fb-secondary-text: #65676b;
-            --fb-border: #ccd0d5;
+            --comm-primary: #6366f1;
+            --comm-primary-hover: #4f46e5;
+            --comm-success: #10b981;
+            --comm-success-hover: #059669;
+            --comm-bg: #0f172a;
+            --comm-card-bg: #1e293b;
+            --comm-border: #334155;
+            --comm-text: #f8fafc;
+            --comm-text-secondary: #94a3b8;
+            --comm-input-bg: #0f172a;
         }
 
-        body { font-family: Helvetica, Arial, sans-serif; background: var(--fb-bg); margin: 0; padding: 0; color: var(--fb-text); }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--comm-bg); margin: 0; padding: 0; color: var(--comm-text); }
 
         /* --- LOGIN & SIGNUP INTERFACE --- */
-        #auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--fb-bg); padding: 20px; box-sizing: border-box; flex-direction: column; }
+        #auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--comm-bg); padding: 20px; box-sizing: border-box; flex-direction: column; }
         .auth-container { display: flex; max-width: 980px; width: 100%; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 40px; }
         .auth-left { max-width: 500px; }
-        .auth-left h1 { color: var(--fb-blue); font-size: 56px; margin: 0 0 10px 0; font-weight: bold; letter-spacing: -2px; }
-        .auth-left p { font-size: 24px; line-height: 28px; margin: 0; color: #1c1e21; }
+        .auth-left h1 { color: #818cf8; font-size: 52px; margin: 0 0 15px 0; font-weight: 800; letter-spacing: -1px; }
+        .auth-left p { font-size: 20px; line-height: 30px; margin: 0; color: var(--comm-text-secondary); }
 
-        .auth-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 396px; box-sizing: border-box; text-align: center; }
-        .auth-input { width: 100%; padding: 14px 16px; margin-bottom: 12px; border: 1px solid var(--fb-border); border-radius: 6px; box-sizing: border-box; font-size: 16px; outline: none; }
-        .auth-input:focus { border-color: var(--fb-blue); box-shadow: 0 0 0 2px #e7f3ff; }
+        .auth-card { background: var(--comm-card-bg); border: 1px solid var(--comm-border); padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); width: 400px; box-sizing: border-box; text-align: center; }
+        .auth-input { width: 100%; padding: 14px 16px; margin-bottom: 14px; background: var(--comm-input-bg); border: 1px solid var(--comm-border); border-radius: 10px; box-sizing: border-box; font-size: 15px; color: var(--comm-text); outline: none; transition: border-color 0.2s; }
+        .auth-input:focus { border-color: var(--comm-primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+        .auth-input::placeholder { color: #64748b; }
         
-        .auth-btn { width: 100%; padding: 12px; background: var(--fb-blue); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 20px; cursor: pointer; margin-bottom: 12px; }
-        .auth-btn:hover { background: var(--fb-blue-hover); }
+        .auth-btn { width: 100%; padding: 14px; background: var(--comm-primary); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; margin-bottom: 12px; transition: background 0.2s; }
+        .auth-btn:hover { background: var(--comm-primary-hover); }
         
-        .auth-signup-btn { background: var(--fb-green); font-size: 17px; width: auto; padding: 12px 16px; margin: 20px auto 0 auto; display: inline-block; }
-        .auth-signup-btn:hover { background: var(--fb-green-hover); }
+        .auth-signup-btn { background: var(--comm-success); font-size: 15px; width: auto; padding: 12px 24px; margin: 20px auto 0 auto; display: inline-block; }
+        .auth-signup-btn:hover { background: var(--comm-success-hover); }
 
-        .divider { border-bottom: 1px solid var(--fb-border); margin: 20px 0; }
+        .divider { border-bottom: 1px solid var(--comm-border); margin: 20px 0; }
         
-        .social-btn { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid var(--fb-border); border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; background: #fff; color: var(--fb-text); box-sizing: border-box; }
-        .social-btn:hover { background: #f2f2f2; }
+        .social-btn { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--comm-border); border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; background: #0f172a; color: var(--comm-text); box-sizing: border-box; transition: background 0.2s; }
+        .social-btn:hover { background: #334155; }
+        .social-btn img { width: 18px; height: 18px; object-fit: contain; }
 
         /* Language bar */
-        .language-selector-bar { margin-top: 40px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; font-size: 12px; color: var(--fb-secondary-text); }
-        .language-selector-bar span { cursor: pointer; }
-        .language-selector-bar span:hover { text-decoration: underline; }
-        .language-selector-bar span.active { font-weight: bold; color: var(--fb-text); }
+        .language-selector-bar { margin-top: 40px; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; font-size: 13px; color: var(--comm-text-secondary); }
+        .language-selector-bar span { cursor: pointer; transition: color 0.2s; }
+        .language-selector-bar span:hover { color: var(--comm-text); }
+        .language-selector-bar span.active { font-weight: 700; color: #818cf8; }
 
-        /* --- MAIN FEED INTERFACE (FACEBOOK STYLE) --- */
-        #app-container { display: none; }
+        /* --- MAIN FEED INTERFACE --- */
+        #app-container { display: none; min-height: 100vh; background: var(--comm-bg); }
         
         /* Navbar */
-        .fb-header { background: #fff; height: 56px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; padding: 0 16px; }
-        .fb-header-left { display: flex; align-items: center; gap: 10px; }
-        .fb-logo { font-size: 28px; font-weight: bold; color: var(--fb-blue); letter-spacing: -1px; }
-        .fb-user-panel { display: flex; align-items: center; gap: 12px; }
-        .fb-user-badge { background: #e4e6eb; padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 14px; }
-        .fb-logout-btn { background: #e4e6eb; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; color: var(--fb-text); }
-        .fb-logout-btn:hover { background: #d8dadf; }
+        .comm-header { background: var(--comm-card-bg); border-bottom: 1px solid var(--comm-border); height: 64px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 0 24px; }
+        .comm-header-left { display: flex; align-items: center; gap: 12px; }
+        .comm-logo { font-size: 24px; font-weight: 800; color: #818cf8; letter-spacing: -0.5px; }
+        .comm-user-panel { display: flex; align-items: center; gap: 16px; }
+        .comm-user-badge { background: #0f172a; border: 1px solid var(--comm-border); padding: 8px 16px; border-radius: 30px; font-weight: 500; font-size: 14px; color: var(--comm-text-secondary); }
+        .comm-logout-btn { background: #334155; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; color: var(--comm-text); transition: background 0.2s; }
+        .comm-logout-btn:hover { background: #475569; }
 
         /* Main Layout */
-        .fb-main-layout { display: flex; justify-content: center; padding: 20px; gap: 20px; }
-        .fb-feed { width: 100%; max-width: 590px; }
+        .comm-main-layout { display: flex; justify-content: center; padding: 24px; gap: 24px; }
+        .comm-feed { width: 100%; max-width: 640px; }
 
         /* Create Post Box */
-        .fb-create-post { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); padding: 12px 16px 16px 16px; margin-bottom: 16px; }
-        .fb-post-input-row { display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #e4e6eb; padding-bottom: 12px; margin-bottom: 10px; }
-        .fb-post-input-row textarea { width: 100%; border: none; outline: none; resize: none; font-size: 16px; font-family: inherit; height: 40px; padding-top: 8px; }
+        .comm-create-post { background: var(--comm-card-bg); border: 1px solid var(--comm-border); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); }
+        .comm-post-input-row { border-bottom: 1px solid var(--comm-border); padding-bottom: 12px; margin-bottom: 16px; }
+        .comm-post-input-row textarea { width: 100%; background: transparent; border: none; outline: none; resize: none; font-size: 16px; font-family: inherit; color: var(--comm-text); height: 60px; }
+        .comm-post-input-row textarea::placeholder { color: #64748b; }
         
-        .fb-post-actions { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--fb-secondary-text); margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
-        .file-upload-label { cursor: pointer; color: #2e8b57; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .comm-post-actions { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--comm-text-secondary); margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+        .file-upload-label { cursor: pointer; color: #34d399; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         
-        .fb-submit-btn { background: var(--fb-blue); color: white; border: none; width: 100%; padding: 8px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; }
-        .fb-submit-btn:hover { background: var(--fb-blue-hover); }
+        .comm-submit-btn { background: var(--comm-primary); color: white; border: none; width: 100%; padding: 12px; border-radius: 10px; font-weight: 600; font-size: 15px; cursor: pointer; transition: background 0.2s; }
+        .comm-submit-btn:hover { background: var(--comm-primary-hover); }
 
         /* Post Card */
-        .fb-post-card { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); margin-bottom: 16px; padding: 12px 16px; }
-        .fb-post-author { font-weight: bold; font-size: 15px; color: var(--fb-text); display: flex; flex-direction: column; }
-        .fb-post-time { font-size: 12px; color: var(--fb-secondary-text); font-weight: normal; }
-        .fb-post-text { margin: 12px 0; font-size: 15px; line-height: 1.5; word-break: break-word; }
+        .comm-post-card { background: var(--comm-card-bg); border: 1px solid var(--comm-border); border-radius: 16px; margin-bottom: 20px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); }
+        .comm-post-author { font-weight: 700; font-size: 15px; color: var(--comm-text); display: flex; flex-direction: column; }
+        .comm-post-time { font-size: 12px; color: var(--comm-text-secondary); font-weight: 400; margin-top: 2px; }
+        .comm-post-text { margin: 14px 0; font-size: 15px; line-height: 1.6; word-break: break-word; color: #e2e8f0; }
         
-        .fb-post-media img, .fb-post-media video { width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-top: 8px; }
-        .fb-file-link { display: inline-block; padding: 8px 12px; background: #e4e6eb; color: var(--fb-text); text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin-top: 8px; }
+        .comm-post-media img, .comm-post-media video { width: 100%; max-height: 480px; object-fit: cover; border-radius: 12px; margin-top: 12px; border: 1px solid var(--comm-border); }
+        .comm-file-link { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; background: #0f172a; border: 1px solid var(--comm-border); color: #818cf8; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 13px; margin-top: 12px; }
+        .comm-file-link:hover { background: #334155; }
 
         /* Signup Modal */
-        #signup-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 200; justify-content: center; align-items: center; }
-        .signup-box { background: #fff; width: 430px; padding: 20px; border-radius: 8px; box-shadow: 0 2px 15px rgba(0,0,0,0.2); position: relative; }
-        .signup-close { position: absolute; top: 10px; right: 15px; font-size: 22px; cursor: pointer; color: var(--fb-secondary-text); }
+        #signup-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); z-index: 200; justify-content: center; align-items: center; }
+        .signup-box { background: var(--comm-card-bg); border: 1px solid var(--comm-border); width: 420px; padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); position: relative; }
+        .signup-close { position: absolute; top: 16px; right: 20px; font-size: 24px; cursor: pointer; color: var(--comm-text-secondary); transition: color 0.2s; }
+        .signup-close:hover { color: var(--comm-text); }
     </style>
 </head>
 <body>
@@ -105,8 +112,8 @@
     <div id="auth-wrapper">
         <div class="auth-container">
             <div class="auth-left">
-                <h1>facebook</h1>
-                <p id="t-tagline">Connect with friends and the world around you on Facebook.</p>
+                <h1 id="t-brand-title">community</h1>
+                <p id="t-tagline">Connect with friends and the world around you on Community.</p>
             </div>
             
             <div class="auth-card">
@@ -118,10 +125,19 @@
                     
                     <div class="divider"></div>
                     
-                    <!-- Social Login Buttons -->
-                    <button class="social-btn" id="t-google-btn" onclick="loginWithProvider('google')">🌐 Continue with Google</button>
-                    <button class="social-btn" id="t-github-btn" onclick="loginWithProvider('github')">🐙 Continue with GitHub</button>
-                    <button class="social-btn" id="t-discord-btn" onclick="loginWithProvider('discord')">🎮 Continue with Discord</button>
+                    <!-- Social Login Buttons with Official Brand Icons -->
+                    <button class="social-btn" id="t-google-btn" onclick="loginWithProvider('google')">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo"> Continue with Google
+                    </button>
+                    <button class="social-btn" id="t-facebook-btn" onclick="loginWithProvider('facebook')">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" alt="Facebook logo"> Continue with Facebook
+                    </button>
+                    <button class="social-btn" id="t-github-btn" onclick="loginWithProvider('github')">
+                        <img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub logo"> Continue with GitHub
+                    </button>
+                    <button class="social-btn" id="t-discord-btn" onclick="loginWithProvider('discord')">
+                        <img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png" alt="Discord logo"> Continue with Discord
+                    </button>
                     
                     <div class="divider"></div>
                     <button class="auth-btn auth-signup-btn" id="t-create-acc-btn" onclick="openSignupModal()">Create new account</button>
@@ -144,53 +160,53 @@
     <div id="signup-modal">
         <div class="signup-box">
             <span class="signup-close" onclick="closeSignupModal()">&times;</span>
-            <h2 id="t-signup-title" style="margin-top:0; color:var(--fb-text);">Sign Up</h2>
-            <p id="t-signup-subtitle" style="color:var(--fb-secondary-text); font-size:14px;">It's quick and easy.</p>
-            <div class="divider" style="margin:10px 0;"></div>
+            <h2 id="t-signup-title" style="margin-top:0; color:var(--comm-text);">Sign Up</h2>
+            <p id="t-signup-subtitle" style="color:var(--comm-text-secondary); font-size:14px; margin-bottom: 20px;">It's quick and easy.</p>
+            <div class="divider" style="margin:10px 0 20px 0;"></div>
             
             <input type="email" id="signup-email" class="auth-input" placeholder="Your email address">
             <input type="password" id="signup-password" class="auth-input" placeholder="New password">
-            <p id="t-signup-note" style="font-size:11px; color:var(--fb-secondary-text); margin: -5px 0 10px 0;">* A verification code (OTP) will be sent to your email.</p>
-            <button class="auth-btn" id="t-signup-submit" style="background:var(--fb-green);" onclick="handleSignup()">Sign Up & Verify</button>
+            <p id="t-signup-note" style="font-size:12px; color:var(--comm-text-secondary); margin: -2px 0 16px 0;">* A verification code (OTP) will be sent to your email.</p>
+            <button class="auth-btn" id="t-signup-submit" style="background:var(--comm-success);" onclick="handleSignup()">Sign Up & Verify</button>
         </div>
     </div>
 
     <!-- ================= 2. MAIN FEED INTERFACE ================= -->
     <div id="app-container">
-        <!-- Facebook Header Navbar -->
-        <header class="fb-header">
-            <div class="fb-header-left">
-                <div class="fb-logo">facebook</div>
+        <!-- Header Navbar -->
+        <header class="comm-header">
+            <div class="comm-header-left">
+                <div class="comm-logo">community</div>
             </div>
-            <div class="fb-user-panel">
-                <div class="fb-user-badge" id="current-user-email">Loading...</div>
-                <button class="fb-logout-btn" id="t-logout-btn" onclick="logout()">Log Out</button>
+            <div class="comm-user-panel">
+                <div class="comm-user-badge" id="current-user-email">Loading...</div>
+                <button class="comm-logout-btn" id="t-logout-btn" onclick="logout()">Log Out</button>
             </div>
         </header>
 
         <!-- Main Feed Layout -->
-        <div class="fb-main-layout">
-            <div class="fb-feed">
+        <div class="comm-main-layout">
+            <div class="comm-feed">
                 <!-- Create Post Box -->
-                <div class="fb-create-post">
-                    <div class="fb-post-input-row">
+                <div class="comm-create-post">
+                    <div class="comm-post-input-row">
                         <textarea id="post-content" placeholder="What's on your mind?"></textarea>
                     </div>
 
-                    <div class="fb-post-actions">
+                    <div class="comm-post-actions">
                         <label class="file-upload-label" id="t-attach-label">
                             📁 Attach photo/file:
                             <input type="file" id="post-file" style="display: none;" accept="image/*,video/*,.pdf,.zip">
                         </label>
-                        <span id="file-name-display" style="font-size: 12px; color: var(--fb-secondary-text);">No file chosen</span>
+                        <span id="file-name-display" style="font-size: 13px; color: var(--comm-text-secondary);">No file chosen</span>
                     </div>
 
                     <!-- reCAPTCHA -->
-                    <div style="margin-bottom: 12px; display: flex; justify-content: center;">
+                    <div style="margin-bottom: 16px; display: flex; justify-content: center;">
                         <div class="g-recaptcha" data-sitekey="6Ld4y2AtAAAAABbpaYVKvm80BkecZyohkh8MN2mu"></div>
                     </div>
 
-                    <button class="fb-submit-btn" id="t-post-btn" onclick="createPost()">Post</button>
+                    <button class="comm-submit-btn" id="t-post-btn" onclick="createPost()">Post</button>
                 </div>
 
                 <!-- Feed Container -->
@@ -207,16 +223,18 @@
         let currentUser = null;
         let currentLang = 'en';
 
-        // --- Đ DICTIONARY CHO CÁC NGÔN NGỮ ---
+        // --- DICTIONARY CHO CÁC NGÔN NGỮ ---
         const translations = {
             en: {
-                tagline: "Connect with friends and the world around you on Facebook.",
+                brandTitle: "community",
+                tagline: "Connect with friends and the world around you on Community.",
                 loginEmailPlaceholder: "Email or phone number",
                 loginPassPlaceholder: "Password",
                 loginBtn: "Log In",
-                googleBtn: "🌐 Continue with Google",
-                githubBtn: "🐙 Continue with GitHub",
-                discordBtn: "🎮 Continue with Discord",
+                googleBtn: 'Continue with Google',
+                facebookBtn: 'Continue with Facebook',
+                githubBtn: 'Continue with GitHub',
+                discordBtn: 'Continue with Discord',
                 createAccBtn: "Create new account",
                 signupTitle: "Sign Up",
                 signupSubtitle: "It's quick and easy.",
@@ -231,13 +249,15 @@
                 postBtn: "Post"
             },
             vi: {
-                tagline: "Giúp bạn kết nối và chia sẻ với mọi người trong cuộc sống của bạn.",
+                brandTitle: "community",
+                tagline: "Giúp bạn kết nối và chia sẻ với mọi người trong cộng đồng của bạn.",
                 loginEmailPlaceholder: "Email hoặc số điện thoại",
                 loginPassPlaceholder: "Mật khẩu",
                 loginBtn: "Đăng nhập",
-                googleBtn: "🌐 Tiếp tục với Google",
-                githubBtn: "🐙 Tiếp tục với GitHub",
-                discordBtn: "🎮 Tiếp tục với Discord",
+                googleBtn: 'Tiếp tục với Google',
+                facebookBtn: 'Tiếp tục với Facebook',
+                githubBtn: 'Tiếp tục với GitHub',
+                discordBtn: 'Tiếp tục với Discord',
                 createAccBtn: "Tạo tài khoản mới",
                 signupTitle: "Đăng ký",
                 signupSubtitle: "Nhanh chóng và dễ dàng.",
@@ -252,13 +272,15 @@
                 postBtn: "Đăng bài"
             },
             es: {
-                tagline: "Conéctate con amigos y el mundo que te rodea en Facebook.",
+                brandTitle: "community",
+                tagline: "Conéctate con amigos y el mundo que te rodea en Community.",
                 loginEmailPlaceholder: "Correo electrónico o número de teléfono",
                 loginPassPlaceholder: "Contraseña",
                 loginBtn: "Iniciar sesión",
-                googleBtn: "🌐 Continuar con Google",
-                githubBtn: "🐙 Continuar con GitHub",
-                discordBtn: "🎮 Continuar con Discord",
+                googleBtn: 'Continuar con Google',
+                facebookBtn: 'Continuar con Facebook',
+                githubBtn: 'Continuar con GitHub',
+                discordBtn: 'Continuar con Discord',
                 createAccBtn: "Crear cuenta nueva",
                 signupTitle: "Regístrate",
                 signupSubtitle: "Es rápido y fácil.",
@@ -273,13 +295,15 @@
                 postBtn: "Publicar"
             },
             fr: {
-                tagline: "Facebook vous permet de rester en contact avec les personnes qui comptent pour vous.",
+                brandTitle: "community",
+                tagline: "Community vous permet de rester en contact avec les personnes qui comptent pour vous.",
                 loginEmailPlaceholder: "E-mail ou numéro de téléphone",
                 loginPassPlaceholder: "Mot de passe",
                 loginBtn: "Se connecter",
-                googleBtn: "🌐 Continuer avec Google",
-                githubBtn: "🐙 Continuer avec GitHub",
-                discordBtn: "🎮 Continuer avec Discord",
+                googleBtn: 'Continuer avec Google',
+                facebookBtn: 'Continuer avec Facebook',
+                githubBtn: 'Continuer avec GitHub',
+                discordBtn: 'Continuer avec Discord',
                 createAccBtn: "Créer nouveau compte",
                 signupTitle: "S'inscrire",
                 signupSubtitle: "C'est rapide et facile.",
@@ -294,13 +318,15 @@
                 postBtn: "Publier"
             },
             ja: {
-                tagline: "Facebookで友達や同僚、知人-つながりを深めましょう。",
+                brandTitle: "community",
+                tagline: "Communityで友達や同僚、知人-つながりを深めましょう。",
                 loginEmailPlaceholder: "メールアドレスまたは電話番号",
                 loginPassPlaceholder: "パスワード",
                 loginBtn: "ログイン",
-                googleBtn: "🌐 Googleで続ける",
-                githubBtn: "🐙 GitHubで続ける",
-                discordBtn: "🎮 Discordで続ける",
+                googleBtn: 'Googleで続ける',
+                facebookBtn: 'Facebookで続ける',
+                githubBtn: 'GitHubで続ける',
+                discordBtn: 'Discordで続ける',
                 createAccBtn: "新しいアカウントを作成",
                 signupTitle: "アカウント登録",
                 signupSubtitle: "簡単で素早くできます。",
@@ -315,13 +341,15 @@
                 postBtn: "投稿"
             },
             ko: {
-                tagline: "Facebook을 통해 주변 사람들과 함께 소통하세요.",
+                brandTitle: "community",
+                tagline: "Community을 통해 주변 사람들과 함께 소통하세요.",
                 loginEmailPlaceholder: "이메일 또는 전화번호",
                 loginPassPlaceholder: "비밀번호",
                 loginBtn: "로그인",
-                googleBtn: "🌐 Google로 계속하기",
-                githubBtn: "🐙 GitHub로 계속하기",
-                discordBtn: "🎮 Discord로 계속하기",
+                googleBtn: 'Google로 계속하기',
+                facebookBtn: 'Facebook로 계속하기',
+                githubBtn: 'GitHub로 계속하기',
+                discordBtn: 'Discord로 계속하기',
                 createAccBtn: "새 계정 만들기",
                 signupTitle: "회원가입",
                 signupSubtitle: "빠르고 쉽습니다.",
@@ -343,13 +371,17 @@
             document.getElementById('lang-' + lang).classList.add('active');
 
             const t = translations[lang];
+            document.getElementById('t-brand-title').innerText = t.brandTitle;
             document.getElementById('t-tagline').innerText = t.tagline;
             document.getElementById('login-email').placeholder = t.loginEmailPlaceholder;
             document.getElementById('login-password').placeholder = t.loginPassPlaceholder;
             document.getElementById('t-login-btn').innerText = t.loginBtn;
-            document.getElementById('t-google-btn').innerText = t.googleBtn;
-            document.getElementById('t-github-btn').innerText = t.githubBtn;
-            document.getElementById('t-discord-btn').innerText = t.discordBtn;
+            
+            document.getElementById('t-google-btn').innerHTML = `<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo"> ${t.googleBtn}`;
+            document.getElementById('t-facebook-btn').innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" alt="Facebook logo"> ${t.facebookBtn}`;
+            document.getElementById('t-github-btn').innerHTML = `<img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub logo"> ${t.githubBtn}`;
+            document.getElementById('t-discord-btn').innerHTML = `<img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png" alt="Discord logo"> ${t.discordBtn}`;
+
             document.getElementById('t-create-acc-btn').innerText = t.createAccBtn;
             document.getElementById('t-signup-title').innerText = t.signupTitle;
             document.getElementById('t-signup-subtitle').innerText = t.signupSubtitle;
@@ -363,11 +395,10 @@
             document.getElementById('t-post-btn').innerText = t.postBtn;
         }
 
-        // --- GỬI THÔNG BÁO LỖI VỀ EMAIL (lamnguyenkhang78@gmail.com) ---
+        // --- GỬI THÔNG BÁO LỖI VỀ EMAIL ---
         function reportErrorToEmail(errorMsg, contextInfo) {
             console.error("Error captured:", errorMsg);
             
-            // Sử dụng EmailJS để tự động gửi thông tin lỗi về địa chỉ mail yêu cầu
             emailjs.send("default_service", "template_error_notify", {
                 to_email: "lamnguyenkhang78@gmail.com",
                 error_message: errorMsg,
@@ -523,26 +554,26 @@
             if (data) {
                 data.forEach(post => {
                     const div = document.createElement('div');
-                    div.className = 'fb-post-card';
+                    div.className = 'comm-post-card';
 
                     let mediaHtml = '';
                     if (post.media_url) {
                         const ext = post.media_url.split('.').pop().toLowerCase();
                         if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
-                            mediaHtml = `<div class="fb-post-media"><img src="${post.media_url}" alt="Post image"></div>`;
+                            mediaHtml = `<div class="comm-post-media"><img src="${post.media_url}" alt="Post image"></div>`;
                         } else if (['mp4', 'webm', 'ogg'].includes(ext)) {
-                            mediaHtml = `<div class="fb-post-media"><video controls src="${post.media_url}"></video></div>`;
+                            mediaHtml = `<div class="comm-post-media"><video controls src="${post.media_url}"></video></div>`;
                         } else {
-                            mediaHtml = `<div><a class="fb-file-link" href="${post.media_url}" target="_blank">📥 Download attachment</a></div>`;
+                            mediaHtml = `<div><a class="comm-file-link" href="${post.media_url}" target="_blank">📥 Download attachment</a></div>`;
                         }
                     }
 
                     div.innerHTML = `
-                        <div class="fb-post-author">
+                        <div class="comm-post-author">
                             ${escapeHtml(post.username)}
-                            <span class="fb-post-time">${new Date(post.created_at).toLocaleString()}</span>
+                            <span class="comm-post-time">${new Date(post.created_at).toLocaleString()}</span>
                         </div>
-                        <div class="fb-post-text">${escapeHtml(post.content || '')}</div>
+                        <div class="comm-post-text">${escapeHtml(post.content || '')}</div>
                         ${mediaHtml}
                     `;
                     feedContainer.appendChild(div);
